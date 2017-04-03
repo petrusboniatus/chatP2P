@@ -1,5 +1,7 @@
 package server;
 
+import java.util.ArrayList;
+
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
  */

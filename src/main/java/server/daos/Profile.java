@@ -1,7 +1,6 @@
 package server.daos;
 
 import api.IServer;
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.*;
 
 import java.util.ArrayList;
@@ -19,9 +18,10 @@ public class Profile implements IServer.IProfile{
 
     @Id
     private String nombre;
-    private List<Profile> amigos;
-    @Reference
-    private List<Profile> peticionesPendientes;
+    @Embedded
+    private List<String> amigos;
+    @Embedded
+    private List<String> peticionesPendientes;
 
     boolean online;
 
@@ -43,19 +43,25 @@ public class Profile implements IServer.IProfile{
     }
 
 
-
-    public List<Profile> getAmigos() {
-        return amigos;
-    }
-
-    public List<Profile> getPeticionesPendientes() {
-        return peticionesPendientes;
-    }
-
     public boolean isOnline() {
         return online;
     }
 
+    public List<String> getAmigos() {
+        return amigos;
+    }
+
+    public void setAmigos(List<String> amigos) {
+        this.amigos = amigos;
+    }
+
+    public List<String> getPeticionesPendientes() {
+        return peticionesPendientes;
+    }
+
+    public void setPeticionesPendientes(List<String> peticionesPendientes) {
+        this.peticionesPendientes = peticionesPendientes;
+    }
 
 
     public void setName(String nombre) {

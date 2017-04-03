@@ -12,6 +12,11 @@ public class CryptedPass {
     private Profile usuario;
     private String encryptedPass;
 
+    public CryptedPass(Profile usuario, String encryptedPass) {
+        this.usuario = usuario;
+        this.encryptedPass = encryptedPass;
+    }
+
     public Profile getUsuario() {
         return usuario;
     }

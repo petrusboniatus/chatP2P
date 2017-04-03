@@ -78,29 +78,24 @@ public class DAOUsuarios {
 
     public void borrarPeticion(Profile amigoEnviador, Profile amigoRecibidor ){
 
-        List<String> nuevaListaPeticiones = datastore.get(Profile.class,amigoRecibidor.getName()).getPeticionesPendientes();
-        nuevaListaPeticiones.remove(amigoEnviador.getName());
         datastore.findAndModify(
                 datastore.createQuery(Profile.class).field("nombre").equal(amigoRecibidor.getName()),
-                datastore.createUpdateOperations(Profile.class).set("peticionesPendientes",nuevaListaPeticiones)
+                datastore.createUpdateOperations(Profile.class).removeAll("peticionesPendientes",amigoEnviador.getName())
         );
+
 
     }
 
     public void borrarAmigo(Profile amigo1, Profile amigo2 ){
 
-        List<String> nuevaListaAmigos = datastore.get(Profile.class,amigo2.getName()).getAmigos();
-        nuevaListaAmigos.remove(amigo1.getName());
         datastore.findAndModify(
                 datastore.createQuery(Profile.class).field("nombre").equal(amigo1.getName()),
-                datastore.createUpdateOperations(Profile.class).set("amigos",nuevaListaAmigos)
+                datastore.createUpdateOperations(Profile.class).removeAll("amigos",amigo2.getName())
         );
 
-        nuevaListaAmigos = datastore.get(Profile.class,amigo1.getName()).getAmigos();
-        nuevaListaAmigos.remove(amigo2.getName());
         datastore.findAndModify(
                 datastore.createQuery(Profile.class).field("nombre").equal(amigo2.getName()),
-                datastore.createUpdateOperations(Profile.class).set("amigos",nuevaListaAmigos)
+                datastore.createUpdateOperations(Profile.class).removeAll("amigos",amigo1.getName())
         );
 
     }

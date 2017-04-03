@@ -1,15 +1,13 @@
 package server.utils;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 
 public class Security {
     private static final int iterations = 64;
@@ -19,27 +17,25 @@ public class Security {
     }
 
     public static boolean checkPassword(String password, String storedHash) {
-        BASE64Decoder dc = new BASE64Decoder();
+        Base64.Decoder dc = Base64.getDecoder();
 
-        try {
-            String[] parts = storedHash.split("\\$");
-            byte[] encrypted = dc.decodeBuffer(parts[0]);
-            byte[] seed = dc.decodeBuffer(parts[1]);
-            byte[] newHash = hashPassword(password.toCharArray(), seed);
-            return slowEquals(newHash, encrypted);
-        } catch (IOException var7) {
-            var7.printStackTrace();
-            return false;
-        }
+        String[] parts = storedHash.split("\\$");
+        byte[] encrypted = dc.decode(parts[0]);
+        byte[] seed = dc.decode(parts[1]);
+        byte[] newHash = hashPassword(password.toCharArray(), seed);
+
+        return slowEquals(newHash, encrypted);
     }
 
     public static String encrypt(String password) {
-        BASE64Encoder dc = new BASE64Encoder();
+        Base64.Encoder dc = Base64.getEncoder();
+
         byte[] salt = new byte[64];
         SecureRandom rand = new SecureRandom();
         rand.nextBytes(salt);
         byte[] hash = hashPassword(password.toCharArray(), salt);
-        return dc.encode(hash) + "$" + dc.encode(salt);
+
+        return dc.encodeToString(hash) + "$" + dc.encodeToString(salt);
     }
 
     private static boolean slowEquals(byte[] a, byte[] b) {

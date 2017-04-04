@@ -43,12 +43,13 @@ public class ServerManager {
         daoLogin.inicializar();
         daoUsuarios = new DAOUsuarios();
         daoUsuarios.inicializar();
-        server = new Server(daoLogin, daoUsuarios, clientesConectados);
+
         limpiador = new LimpiadorClientesConectados(clientesConectados, daoUsuarios);
         hiloLimpiador = new Thread(limpiador);
 
         try {
 
+            server = new Server(daoLogin, daoUsuarios, clientesConectados);
             startRegistry(portNum);
             Naming.rebind("rmi://" + urlRegistro +":"+portNum+ "/Server", server);
             System.out.println("Callback Server ready.");

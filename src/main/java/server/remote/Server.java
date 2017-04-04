@@ -9,12 +9,13 @@ import server.utils.RandomString;
 import server.utils.Security;
 
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 @SuppressWarnings("unchecked")
-public class Server implements IServer {
+public class Server extends UnicastRemoteObject implements IServer {
 
     private static final int ACTUALIZACIONES = 2; //Lo que tarda en borrarse del servidor si no hay renovación
 
@@ -183,7 +184,8 @@ public class Server implements IServer {
     }
 
 
-    public Server(DAOLogin daoLogin, DAOUsuarios daoUsuarios, ConcurrentHashMap clientesConectados) {
+    public Server(DAOLogin daoLogin, DAOUsuarios daoUsuarios, ConcurrentHashMap clientesConectados) throws RemoteException{
+        super();
         this.clientesConectados = clientesConectados;
         this.daoLogin = daoLogin;
         this.daoUsuarios = daoUsuarios;

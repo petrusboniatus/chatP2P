@@ -16,11 +16,6 @@ public class Client extends UnicastRemoteObject implements IClient, Serializable
     protected Client() throws RemoteException {}
 
     @Override
-    public boolean stillAlive() throws RemoteException {
-        return true;
-    }
-
-    @Override
     public void notifyFriendListUpdates() throws RemoteException {
         if (manager != null) {
             manager.updateFriends();

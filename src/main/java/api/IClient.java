@@ -7,7 +7,6 @@ import java.rmi.RemoteException;
  */
 public interface IClient extends Remote {
 
-
     /**
      * Notifica al cliente que su lista de amigos ha cambiado de estado
      * Esto puede deberse a que han aceptado una peticion de amistad o se ha connectado/desconectado un amigo

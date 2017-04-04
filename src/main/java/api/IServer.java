@@ -1,4 +1,6 @@
 package api;
+
+import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -7,6 +9,13 @@ import java.util.List;
  * Created by Carlos Couto Cerdeira on 4/3/17.
  */
 public interface IServer extends Remote {
+
+    /**
+     * Avisa al servidor de que el cliente sigue activo
+     *
+     * @param me token autentificacion
+     */
+    void imAlive(IAuthToken me) throws RemoteException;
 
     /**
      * Se registra un usuario nuevo
@@ -54,13 +63,12 @@ public interface IServer extends Remote {
     /**
      * recibir las peticiones de amistad
      *
-     * @param me   token autentificacion
+     * @param me token autentificacion
      */
 
     List<IProfile> getFriendShipRequest(IAuthToken me) throws RemoteException;
 
     /**
-     * 
      * @param me   token autentificacion
      * @param name nombre del usuario a dejar de ser amigo
      */
@@ -77,7 +85,7 @@ public interface IServer extends Remote {
         // El servidor implementa esto como quiera
     }
 
-    interface IProfile {
+    interface IProfile extends Serializable {
 
         /**
          * Obtiene el nombre del usurio
@@ -88,7 +96,7 @@ public interface IServer extends Remote {
 
         /**
          * Comprueba si el usuario esta connectado o no
-         * 
+         *
          * @return true si el usuario esta connectado en el momento de creacion de IProfile
          */
         boolean isConnected();

@@ -2,13 +2,14 @@ package client;
 
 import api.IClient;
 
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
  */
-public class Client extends UnicastRemoteObject implements IClient {
+public class Client extends UnicastRemoteObject implements IClient, Serializable {
 
     private FriendManager manager;
 

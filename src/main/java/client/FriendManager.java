@@ -11,10 +11,10 @@ import java.util.List;
  */
 public class FriendManager {
 
-    private ServerConnection handler;
+    private ServerHandler handler;
     private List<IServer.IProfile> profiles = new ArrayList<>(0);
 
-    public FriendManager(ServerConnection handler) {
+    public FriendManager(ServerHandler handler) {
         this.handler = handler;
     }
 

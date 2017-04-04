@@ -17,11 +17,11 @@ public class GUI {
     private View menu;
 
     public void init() {
-        loading = handler.loadView("client/loading.html");
-        login = handler.loadView("client/login.html");
-        menu = handler.loadView("client/menu.html");
+        loading = handler.loadView("client/view/loading.html");
+        login = handler.loadView("client/view/login.html");
+        menu = handler.loadView("client/view/menu.html");
 
-        load(menu);
+        load(loading);
     }
 
     public View getLoading() {

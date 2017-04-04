@@ -1,10 +1,16 @@
 package client.controller;
 
+import api.IServer;
 import client.ServerHandler;
+
+import java.rmi.RemoteException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
  */
+@SuppressWarnings("ALL")
 public class Controller {
 
     private GUI gui;
@@ -35,9 +41,23 @@ public class Controller {
     }
 
     public boolean tryRegister(String name, String password) {
-        return serverHandler.tryRegister(name, password);
+        try {
+            serverHandler.getServer().registerUser(name, password);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
+    public List<IServer.IProfile> getFriends(){
+        try {
+            return serverHandler.getServer().getFriends(serverHandler.getToken());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
 
     public void log(Object any) {
         System.out.println("js> " + any);

@@ -3,6 +3,8 @@ package client;
 import api.IServer;
 import api.RMI;
 
+import java.rmi.RemoteException;
+
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
  */
@@ -12,19 +14,39 @@ public class ServerHandler {
     private IServer server = null;
     private Client client = null;
     private IServer.IAuthToken token;
+    private Thread alive;
 
     public ServerHandler(Client client, String url) {
         this.url = url;
         this.client = client;
+        alive = new Thread(this::runThread);
     }
 
     public boolean tryLogin(String name, String password) {
         try {
             token = server.login(client, name, password);
+            alive.start();
         } catch (Exception e) {
             return false;
         }
         return true;
+    }
+
+    private void runThread() {
+        while (server != null) {
+            try {
+                server.imAlive(token);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                server = null;
+                break;
+            }
+            try {
+                Thread.sleep(60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public IServer.IAuthToken getToken() {
@@ -36,14 +58,5 @@ public class ServerHandler {
             server = RMI.lookup(url);
         }
         return server;
-    }
-
-    public boolean tryRegister(String name, String password) {
-        try {
-            getServer().registerUser(name, password);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 }

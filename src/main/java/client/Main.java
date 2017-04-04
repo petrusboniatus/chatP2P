@@ -14,7 +14,7 @@ public class Main {
 
         gui.init();
 
-        Client client = null;
+        Client client;
 
         try {
             client = new Client();
@@ -23,7 +23,7 @@ public class Main {
             return;
         }
 
-        ServerHandler handler = new ServerHandler(client, "rmi://localhost:1099/server");
+        ServerHandler handler = new ServerHandler(client, "rmi://localhost:1099/Server");
 
         if(handler.getServer() == null){
             gui.getController().showError("Error al connectar con el servidor");

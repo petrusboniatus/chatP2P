@@ -31,13 +31,15 @@ public class DAOLogin {
     }
 
 
-    public void setCryptedPass(Profile usuario, String cryptedPass){
+    public void setCryptedPass(String usuario, String cryptedPass){
         datastore.save(new CryptedPass(usuario, cryptedPass));
     }
 
-    public String getCryptedPass(Profile usuario){
+    public String getCryptedPass(String usuario){
         return datastore.createQuery(CryptedPass.class).field("usuario").equal(usuario).get().getEncryptedPass();
     }
+
+
 
 
 }

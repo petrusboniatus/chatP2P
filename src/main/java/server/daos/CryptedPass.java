@@ -9,19 +9,19 @@ public class CryptedPass {
 
 
     @Reference
-    private Profile usuario;
+    private String usuario;
     private String encryptedPass;
 
-    public CryptedPass(Profile usuario, String encryptedPass) {
+    public CryptedPass(String usuario, String encryptedPass) {
         this.usuario = usuario;
         this.encryptedPass = encryptedPass;
     }
 
-    public Profile getUsuario() {
+    public String getUsuario() {
         return usuario;
     }
 
-    public void setUsuario(Profile usuario) {
+    public void setUsuario(String usuario) {
         this.usuario = usuario;
     }
 
@@ -40,11 +40,14 @@ public class CryptedPass {
 
         CryptedPass that = (CryptedPass) o;
 
-        return usuario != null ? usuario.equals(that.usuario) : that.usuario == null;
+        if (usuario != null ? !usuario.equals(that.usuario) : that.usuario != null) return false;
+        return encryptedPass != null ? encryptedPass.equals(that.encryptedPass) : that.encryptedPass == null;
     }
 
     @Override
     public int hashCode() {
-        return usuario != null ? usuario.hashCode() : 0;
+        int result = usuario != null ? usuario.hashCode() : 0;
+        result = 31 * result + (encryptedPass != null ? encryptedPass.hashCode() : 0);
+        return result;
     }
 }

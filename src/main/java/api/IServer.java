@@ -52,6 +52,14 @@ public interface IServer extends Remote {
     void sendFriendshiptRequest(IAuthToken me, String name) throws RemoteException;
 
     /**
+     * recibir las peticiones de amistad
+     *
+     * @param me   token autentificacion
+     */
+
+    List<IProfile> getFriendShipRequest(IAuthToken me) throws RemoteException;
+
+    /**
      * 
      * @param me   token autentificacion
      * @param name nombre del usuario a dejar de ser amigo

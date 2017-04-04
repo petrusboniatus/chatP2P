@@ -7,13 +7,30 @@ import api.IClient;
  */
 class TimedClient {
 
-        IClient client;
-        AuthToken aut;
+
+
+    IClient client;
         int timeLeft;
 
-    public TimedClient(IClient client, AuthToken aut, int timeLeft) {
+
+    public TimedClient(IClient client, int timeLeft) {
         this.client = client;
-        this.aut = aut;
+        this.timeLeft = timeLeft;
+    }
+
+    public IClient getClient() {
+        return client;
+    }
+
+    public void setClient(IClient client) {
+        this.client = client;
+    }
+
+    public int getTimeLeft() {
+        return timeLeft;
+    }
+
+    public void setTimeLeft(int timeLeft) {
         this.timeLeft = timeLeft;
     }
 
@@ -24,16 +41,11 @@ class TimedClient {
 
         TimedClient that = (TimedClient) o;
 
-        if (timeLeft != that.timeLeft) return false;
-        if (client != null ? !client.equals(that.client) : that.client != null) return false;
-        return aut != null ? aut.equals(that.aut) : that.aut == null;
+        return client != null ? client.equals(that.client) : that.client == null;
     }
 
     @Override
     public int hashCode() {
-        int result = client != null ? client.hashCode() : 0;
-        result = 31 * result + (aut != null ? aut.hashCode() : 0);
-        result = 31 * result + timeLeft;
-        return result;
+        return client != null ? client.hashCode() : 0;
     }
 }

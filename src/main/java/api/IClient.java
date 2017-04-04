@@ -7,12 +7,6 @@ import java.rmi.RemoteException;
  */
 public interface IClient extends Remote {
 
-    /**
-     * Check if the client is still active
-     *
-     * @return true is connected, exception otherwise
-     */
-    boolean stillAlive() throws RemoteException;
 
     /**
      * Notifica al cliente que su lista de amigos ha cambiado de estado

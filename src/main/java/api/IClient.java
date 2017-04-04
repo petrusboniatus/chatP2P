@@ -1,11 +1,12 @@
 package api;
+import java.io.Serializable;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
  */
-public interface IClient extends Remote {
+public interface IClient extends Remote,Serializable {
 
     /**
      * Notifica al cliente que su lista de amigos ha cambiado de estado

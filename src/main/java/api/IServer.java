@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
  */
-public interface IServer extends Remote {
+public interface IServer extends Remote, Serializable {
 
     /**
      * Avisa al servidor de que el cliente sigue activo

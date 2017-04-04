@@ -50,7 +50,7 @@ public class ServerManager {
         try {
 
             startRegistry(portNum);
-            Naming.rebind("rmi://" + urlRegistro + "/Server", server);
+            Naming.rebind("rmi://" + urlRegistro +":"+portNum+ "/Server", server);
             System.out.println("Callback Server ready.");
 
             hiloLimpiador.start();
@@ -65,7 +65,7 @@ public class ServerManager {
 
         try {
 
-            Naming.unbind("rmi://" + urlRegistro + "/Server");
+            Naming.unbind("rmi://" + urlRegistro +":"+portNum+ "/Server");
             System.out.println("La desconexion se ha relizado de manera correcta");
 
         } catch (Exception e) {

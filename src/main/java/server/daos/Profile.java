@@ -30,6 +30,12 @@ public class Profile implements IServer.IProfile{
         this.peticionesPendientes = new ArrayList<>();
     };
 
+    public Profile(String nombre){
+        this.nombre = nombre;
+        this.amigos = new ArrayList<>();
+        this.peticionesPendientes = new ArrayList<>();
+    };
+
 
 
     @Override

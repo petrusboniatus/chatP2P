@@ -74,6 +74,13 @@ public interface IServer extends Remote {
      */
     void sendUnFriendshiptRequest(IAuthToken me, String name) throws RemoteException;
 
+
+    /**
+     * @param me    token autenticacion
+     * @param amigo futuro amigo
+     */
+    void acceptFriendPetition(IAuthToken me, IProfile amigo) throws RemoteException;
+
     /**
      * @param me          token autentificacion
      * @param searchInput texto de busqueda

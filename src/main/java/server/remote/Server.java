@@ -9,18 +9,16 @@ import server.utils.RandomString;
 import server.utils.Security;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by pedro on 4/04/17.
- */
+
 @SuppressWarnings("unchecked")
 public class Server implements IServer {
 
-    private HashMap<AuthToken, TimedClient> clientesConectados;
+    private static final int ACTUALIZACIONES = 2; //Lo que tarda en borrarse del servidor si no hay renovación
+
+    private ConcurrentHashMap<AuthToken, TimedClient> clientesConectados;
     private DAOLogin daoLogin;
     private DAOUsuarios daoUsuarios;
     private RandomString random;
@@ -28,8 +26,11 @@ public class Server implements IServer {
 
     @Override
     public void imAlive(IAuthToken me) throws RemoteException {
+
         if(!clientesConectados.containsKey(me))
             throw new IllegalArgumentException("No es un cliente logueado");
+
+        clientesConectados.get(me).setTimeLeft(ACTUALIZACIONES);
     }
 
     @Override
@@ -63,7 +64,7 @@ public class Server implements IServer {
         AuthToken nuevaAut = new AuthToken(usuario, random.getString());
 
         usuario.setOnline(true);
-        clientesConectados.put(nuevaAut, new TimedClient(me, 1,usuario));
+        clientesConectados.put(nuevaAut, new TimedClient(me, ACTUALIZACIONES,usuario));
         daoUsuarios.actualizarUsuario(usuario);
 
         return nuevaAut;
@@ -73,7 +74,8 @@ public class Server implements IServer {
     @Override
     public List<IProfile> getFriends(IAuthToken me) throws RemoteException {
 
-
+        if(!clientesConectados.containsKey(me))
+            throw new IllegalArgumentException("No es un cliente logueado");
         if (!this.clientesConectados.containsKey(me))
             throw new IllegalArgumentException("el usuario no existe");
 
@@ -96,13 +98,18 @@ public class Server implements IServer {
         if(!amigo.isConnected())
             throw new IllegalArgumentException("Tu amigo no está conectado");
 
-        final IProfile amigoFinal = amigo;
-        Optional<AuthToken> token = clientesConectados.keySet()
-                .parallelStream()
-                .filter(authToken -> authToken.getNombreUsuario().equals(amigoFinal.getName()))
-                .findFirst();
 
-        return clientesConectados.get(token.get()).getClient();
+        AuthToken token = null;
+        for(AuthToken aut: clientesConectados.keySet())
+            if(aut.getNombreUsuario().equals(amigo.getName())) {
+                token = aut;
+                break;
+            }
+
+        if(token ==null)
+            throw new IllegalArgumentException("Tu amigo no está conectado");
+
+        return clientesConectados.get(token).getClient();
 
     }
 
@@ -118,7 +125,7 @@ public class Server implements IServer {
         Profile enviador = this.clientesConectados.get(me).getPefil();
         Profile receptor = new Profile(name);
 
-        this.daoUsuarios.anhadirPeticion(enviador,enviador);
+        this.daoUsuarios.anhadirPeticion(enviador,receptor);
 
     }
 
@@ -155,6 +162,15 @@ public class Server implements IServer {
 
         daoUsuarios.borrarPeticion((Profile)amigo,aceptador);
         daoUsuarios.anhadirAmigo((Profile)amigo,aceptador);
+
+        for(TimedClient c : clientesConectados.values())
+            if(c.getPefil().equals(amigo)){
+                try{
+                    c.getClient().notifyFriendListUpdates();
+                }catch (RemoteException e){}
+                break;
+            }
+
     }
 
     @Override
@@ -167,11 +183,9 @@ public class Server implements IServer {
     }
 
 
-    public Server() {
-        clientesConectados = new HashMap<>();
-        daoLogin = new DAOLogin();
-        daoLogin.inicializar();
-        daoUsuarios = new DAOUsuarios();
-        daoUsuarios.inicializar();
+    public Server(DAOLogin daoLogin, DAOUsuarios daoUsuarios, ConcurrentHashMap clientesConectados) {
+        this.clientesConectados = clientesConectados;
+        this.daoLogin = daoLogin;
+        this.daoUsuarios = daoUsuarios;
     }
 }

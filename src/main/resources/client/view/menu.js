@@ -12,11 +12,7 @@ var controller = {
 };
 
 function main() {
-    timer();
-}
 
-function timer() {
-    setTimeout(()=>{ updateFriends(); timer(); }, 1000);
 }
 
 function updateFriends() {

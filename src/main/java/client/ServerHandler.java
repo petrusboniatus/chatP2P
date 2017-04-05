@@ -2,8 +2,11 @@ package client;
 
 import api.IServer;
 import api.RMI;
+import client.controller.ViewState;
 
 import java.rmi.RemoteException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
@@ -19,7 +22,7 @@ public class ServerHandler {
     public ServerHandler(Client client, String url) {
         this.url = url;
         this.client = client;
-        alive = new Thread(this::runThread);
+        alive = new Thread(this::notifyServer);
     }
 
     public boolean tryLogin(String name, String password) {
@@ -33,10 +36,11 @@ public class ServerHandler {
         return true;
     }
 
-    private void runThread() {
-        while (server != null) {
+    // Thread que avisa al servidor que el cliente esta activo
+    private void notifyServer() {
+        while (true) {
             try {
-                server.imAlive(token);
+                getServer().imAlive(token);
             } catch (Exception e) {
                 e.printStackTrace();
                 server = null;
@@ -59,5 +63,14 @@ public class ServerHandler {
             server = RMI.lookup(url);
         }
         return server;
+    }
+
+    public List<IServer.IProfile> getFriends() {
+        try {
+             return getServer().getFriends(token);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 }

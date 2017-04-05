@@ -1,13 +1,11 @@
 package client.controller;
 
 import api.IServer;
+import client.Client;
 import client.ServerHandler;
-import javafx.application.Platform;
-import org.w3c.dom.ls.LSInput;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,29 +14,19 @@ import java.util.List;
 @SuppressWarnings("ALL")
 public class Controller {
 
-    private GUI gui;
-    private ServerHandler serverHandler;
+    private ServerHandler handler;
     private List<IServer.IProfile> friendProfiles = new ArrayList<>(0);
 
 
-    public Controller(GUI gui) {
-        this.gui = gui;
-    }
-
-    public void setServerHandler(ServerHandler serverHandler) {
-        this.serverHandler = serverHandler;
-        gui.load(gui.getLogin());
-    }
-
     public void showError(String error) {
-        gui.getLoading().runOnJS("showError('" + error + "');");
+        ViewState.LOADING.getView().runOnJS("showError('" + error + "');");
     }
 
     public boolean tryLogin(String name, String password) {
-        boolean success = serverHandler.tryLogin(name, password);
+        boolean success = handler.tryLogin(name, password);
         if (success) {
             new Thread(() -> {
-                gui.load(gui.getMenu());
+                ViewState.MENU.load(this);
                 onMenuOpen();
             }).start();
             return true;
@@ -49,7 +37,7 @@ public class Controller {
 
     public boolean tryRegister(String name, String password) {
         try {
-            serverHandler.getServer().registerUser(name, password);
+            handler.getServer().registerUser(name, password);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -63,8 +51,8 @@ public class Controller {
 
     private void onMenuOpen() {
         try {
-            List<String> list = serverHandler.getServer().searchUsers(serverHandler.getToken(), "");
-            List<IServer.IProfile> friends = serverHandler.getServer().getFriends(serverHandler.getToken());
+            List<String> list = handler.getServer().searchUsers(handler.getToken(), "");
+            List<IServer.IProfile> friends = handler.getServer().getFriends(handler.getToken());
             List<String> ignoredUsers = new ArrayList<>(friends.size());
 
             for (IServer.IProfile friend : friends) {
@@ -74,15 +62,15 @@ public class Controller {
             for (String s : list) {
                 if (!ignoredUsers.contains(s)) {
                     System.out.println("send request: "+ s);
-                    serverHandler.getServer().sendFriendshiptRequest(serverHandler.getToken(), s);
+                    handler.getServer().sendFriendshiptRequest(handler.getToken(), s);
                 }
             }
             Thread.sleep(1000);
 
-            List<IServer.IProfile> req = serverHandler.getServer().getFriendShipRequest(serverHandler.getToken());
+            List<IServer.IProfile> req = handler.getServer().getFriendShipRequest(handler.getToken());
 
             for (IServer.IProfile iProfile : req) {
-                serverHandler.getServer().acceptFriendPetition(serverHandler.getToken(), iProfile);
+                handler.getServer().acceptFriendPetition(handler.getToken(), iProfile);
             }
             updateFriends();
         } catch (RemoteException e) {
@@ -93,16 +81,33 @@ public class Controller {
     }
 
     public void updateFriends() {
-        try {
-            friendProfiles = serverHandler.getServer().getFriends(serverHandler.getToken());
-            gui.getMenu().runOnJS("updateFriends();");
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        friendProfiles = handler.getFriends();
+        ViewState.MENU.getView().runOnJS("updateFriends();");
     }
 
     public void log(Object any) {
         System.out.println("js> " + any);
     }
 
+    public void init() {
+        ViewState.LOADING.load(this);
+        
+        Client client;
+
+        try {
+            client = new Client(this);
+        } catch (RemoteException e) {
+            showError("Error interno, no se pudo crear la clase Cliente");
+            return;
+        }
+
+        handler = new ServerHandler(client, "rmi://localhost:1099/Server");
+
+        if(handler.getServer() == null){
+            showError("Error al connectar con el servidor");
+            return;
+        }
+
+        ViewState.LOGIN.load(this);
+    }
 }

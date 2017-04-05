@@ -14,20 +14,12 @@ public class Client extends UnicastRemoteObject implements IClient, Serializable
 
     private Controller manager;
 
-    protected Client() throws RemoteException {}
+    public Client(Controller manager) throws RemoteException {
+        this.manager = manager;
+    }
 
     @Override
     public void notifyFriendListUpdates() throws RemoteException {
-        if (manager != null) {
-            manager.updateFriends();
-        }
-    }
-
-    public Controller getManager() {
-        return manager;
-    }
-
-    public void setManager(Controller manager) {
-        this.manager = manager;
+        manager.updateFriends();
     }
 }

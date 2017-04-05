@@ -2,8 +2,11 @@ package client.controller;
 
 import api.IServer;
 import client.ServerHandler;
+import javafx.application.Platform;
+import org.w3c.dom.ls.LSInput;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,6 +18,8 @@ public class Controller {
 
     private GUI gui;
     private ServerHandler serverHandler;
+    private List<IServer.IProfile> friendProfiles = new ArrayList<>(0);
+
 
     public Controller(GUI gui) {
         this.gui = gui;
@@ -31,9 +36,11 @@ public class Controller {
 
     public boolean tryLogin(String name, String password) {
         boolean success = serverHandler.tryLogin(name, password);
-
         if (success) {
-            gui.load(gui.getMenu());
+            new Thread(() -> {
+                gui.load(gui.getMenu());
+                onMenuOpen();
+            }).start();
             return true;
         } else {
             return false;
@@ -50,12 +57,47 @@ public class Controller {
         }
     }
 
-    public List<IServer.IProfile> getFriends(){
+    public List<IServer.IProfile> getFriends() {
+        return friendProfiles;
+    }
+
+    private void onMenuOpen() {
         try {
-            return serverHandler.getServer().getFriends(serverHandler.getToken());
+            List<String> list = serverHandler.getServer().searchUsers(serverHandler.getToken(), "");
+            List<IServer.IProfile> friends = serverHandler.getServer().getFriends(serverHandler.getToken());
+            List<String> ignoredUsers = new ArrayList<>(friends.size());
+
+            for (IServer.IProfile friend : friends) {
+                ignoredUsers.add(friend.getName());
+            }
+
+            for (String s : list) {
+                if (!ignoredUsers.contains(s)) {
+                    System.out.println("send request: "+ s);
+                    serverHandler.getServer().sendFriendshiptRequest(serverHandler.getToken(), s);
+                }
+            }
+            Thread.sleep(1000);
+
+            List<IServer.IProfile> req = serverHandler.getServer().getFriendShipRequest(serverHandler.getToken());
+
+            for (IServer.IProfile iProfile : req) {
+                serverHandler.getServer().acceptFriendPetition(serverHandler.getToken(), iProfile);
+            }
+            updateFriends();
         } catch (RemoteException e) {
             e.printStackTrace();
-            return Collections.emptyList();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateFriends() {
+        try {
+            friendProfiles = serverHandler.getServer().getFriends(serverHandler.getToken());
+            gui.getMenu().runOnJS("updateFriends();");
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 

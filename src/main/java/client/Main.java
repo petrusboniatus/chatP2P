@@ -30,6 +30,7 @@ public class Main {
             return;
         }
 
+        client.setManager(gui.getController());
         gui.getController().setServerHandler(handler);
     }
 }

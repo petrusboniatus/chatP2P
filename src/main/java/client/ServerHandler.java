@@ -27,6 +27,7 @@ public class ServerHandler {
             token = server.login(client, name, password);
             alive.start();
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -36,13 +37,13 @@ public class ServerHandler {
         while (server != null) {
             try {
                 server.imAlive(token);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 server = null;
                 break;
             }
             try {
-                Thread.sleep(60 * 1000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

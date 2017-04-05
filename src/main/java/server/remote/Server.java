@@ -22,7 +22,7 @@ public class Server extends UnicastRemoteObject implements IServer {
     private ConcurrentHashMap<AuthToken, TimedClient> clientesConectados;
     private DAOLogin daoLogin;
     private DAOUsuarios daoUsuarios;
-    private RandomString random;
+    private RandomString random = new RandomString();
 
 
     @Override
@@ -57,7 +57,7 @@ public class Server extends UnicastRemoteObject implements IServer {
 
         if (clave == null)
             throw new IllegalArgumentException("El usuario no está registrado");
-        if (Security.checkPassword(password, clave))
+        if (!Security.checkPassword(password, clave))
             throw new IllegalArgumentException("La clave es erronea");
 
 
@@ -180,7 +180,13 @@ public class Server extends UnicastRemoteObject implements IServer {
         if(!this.clientesConectados.containsKey(me))
             throw new IllegalArgumentException("usuario no conectado");
 
-        return (List)daoUsuarios.buscarUsuarios(searchInput);
+        List<Profile> profiles = daoUsuarios.buscarUsuarios(searchInput);
+        List<String> list = new ArrayList<>();
+
+        for (Profile profile : profiles) {
+            list.add(profile.getName());
+        }
+        return list;
     }
 
 

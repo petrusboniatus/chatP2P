@@ -20,7 +20,7 @@ public class ServerManager {
     private DAOLogin daoLogin;
     private DAOUsuarios daoUsuarios;
 
-    private ConcurrentHashMap<AuthToken, ClientData> clientesConectados;
+    private ConcurrentHashMap<String, ClientData> clientesConectados;
     private Thread hiloLimpiador;
     private LimpiadorClientesConectados limpiador;
 

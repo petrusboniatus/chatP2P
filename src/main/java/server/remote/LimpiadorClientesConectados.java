@@ -1,6 +1,7 @@
 package server.remote;
 
 import server.daos.DAOUsuarios;
+import server.daos.Profile;
 
 import java.rmi.RemoteException;
 import java.util.Map;
@@ -11,14 +12,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LimpiadorClientesConectados implements Runnable {
 
-    private static final int TIEMPO_ENTRE_LIMPIEZA = 30_000;
+    private static final int TIEMPO_ENTRE_LIMPIEZA = 5_000;
 
-    private ConcurrentHashMap<AuthToken, ClientData> mapaALimpiar;
+    private ConcurrentHashMap<String, ClientData> mapaALimpiar;
     private DAOUsuarios daoUsuarios;
 
     private boolean finalizarHilo;
 
-    public LimpiadorClientesConectados(ConcurrentHashMap<AuthToken, ClientData> mapaALimpiar, DAOUsuarios daoUsuarios) {
+    public LimpiadorClientesConectados(ConcurrentHashMap<String, ClientData> mapaALimpiar, DAOUsuarios daoUsuarios) {
         this.mapaALimpiar = mapaALimpiar;
         this.finalizarHilo = false;
         this.daoUsuarios = daoUsuarios;
@@ -42,7 +43,7 @@ public class LimpiadorClientesConectados implements Runnable {
             try {
                 Thread.sleep(TIEMPO_ENTRE_LIMPIEZA);
 
-                for (Map.Entry<AuthToken, ClientData> entrada : mapaALimpiar.entrySet()) {
+                for (Map.Entry<String, ClientData> entrada : mapaALimpiar.entrySet()) {
 
                     entrada.getValue().setTimeLeft(entrada.getValue().getTimeLeft() - 1);
 
@@ -53,7 +54,9 @@ public class LimpiadorClientesConectados implements Runnable {
 
 
                         try {
-                            entrada.getValue().getClient().notifyFriendListUpdates();
+                            for (Profile profile : daoUsuarios.getAmigos(entrada.getValue().getPefil())) {
+                                mapaALimpiar.get(profile.getName()).getClient().notifyFriendListUpdates();
+                            }
                         } catch (RemoteException e) {
                             //Ingonre this
                         }

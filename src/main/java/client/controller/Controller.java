@@ -16,6 +16,7 @@ public class Controller {
 
     private ServerHandler handler;
     private List<IServer.IProfile> friendProfiles = new ArrayList<>(0);
+    private String clientName;
 
 
     public void showError(String error) {
@@ -25,6 +26,7 @@ public class Controller {
     public boolean tryLogin(String name, String password) {
         boolean success = handler.tryLogin(name, password);
         if (success) {
+            clientName = name;
             new Thread(() -> {
                 ViewState.MENU.load(this);
                 onMenuOpen();
@@ -58,6 +60,8 @@ public class Controller {
             for (IServer.IProfile friend : friends) {
                 ignoredUsers.add(friend.getName());
             }
+
+            ignoredUsers.add(clientName);
 
             for (String s : list) {
                 if (!ignoredUsers.contains(s)) {

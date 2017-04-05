@@ -20,6 +20,7 @@ public class Client extends UnicastRemoteObject implements IClient, Serializable
 
     @Override
     public void notifyFriendListUpdates() throws RemoteException {
+        System.out.println("Friends changed");
         manager.updateFriends();
     }
 }

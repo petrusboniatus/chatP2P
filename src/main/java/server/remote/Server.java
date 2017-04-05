@@ -19,19 +19,31 @@ public class Server extends UnicastRemoteObject implements IServer {
 
     private static final int ACTUALIZACIONES = 2; //Lo que tarda en borrarse del servidor si no hay renovación
 
-    private ConcurrentHashMap<AuthToken, TimedClient> clientesConectados;
+    private ConcurrentHashMap<String, ClientData> clientesConectados;
     private DAOLogin daoLogin;
     private DAOUsuarios daoUsuarios;
     private RandomString random = new RandomString();
 
 
+    private boolean checkConectado(IAuthToken he) {
+
+        AuthToken sub = (AuthToken) he;
+        if (clientesConectados.containsKey(sub.getNombreUsuario())) {
+            ClientData c = clientesConectados.get(sub.getNombreUsuario());
+            return c.getToken().equals(sub);
+        } else {
+            return false;
+        }
+
+    }
+
     @Override
     public void imAlive(IAuthToken me) throws RemoteException {
 
-        if(!clientesConectados.containsKey(me))
+        if (!checkConectado(me))
             throw new IllegalArgumentException("No es un cliente logueado");
 
-        clientesConectados.get(me).setTimeLeft(ACTUALIZACIONES);
+        clientesConectados.get( ((AuthToken)me).getNombreUsuario() ).setTimeLeft(ACTUALIZACIONES);
     }
 
     @Override
@@ -57,7 +69,7 @@ public class Server extends UnicastRemoteObject implements IServer {
 
         if (clave == null)
             throw new IllegalArgumentException("El usuario no está registrado");
-        if (!Security.checkPassword(password, clave))
+        if (Security.checkPassword(password, clave))
             throw new IllegalArgumentException("La clave es erronea");
 
 
@@ -65,9 +77,9 @@ public class Server extends UnicastRemoteObject implements IServer {
         AuthToken nuevaAut = new AuthToken(usuario, random.getString());
 
         usuario.setOnline(true);
-        clientesConectados.put(nuevaAut, new TimedClient(me, ACTUALIZACIONES,usuario));
+        clientesConectados.put(name, new ClientData(me, ACTUALIZACIONES, usuario, nuevaAut));
         daoUsuarios.actualizarUsuario(usuario);
-
+        
         return nuevaAut;
 
     }
@@ -75,13 +87,12 @@ public class Server extends UnicastRemoteObject implements IServer {
     @Override
     public List<IProfile> getFriends(IAuthToken me) throws RemoteException {
 
-        if(!clientesConectados.containsKey(me))
+        if (!checkConectado(me))
             throw new IllegalArgumentException("No es un cliente logueado");
-        if (!this.clientesConectados.containsKey(me))
-            throw new IllegalArgumentException("el usuario no existe");
 
+        Profile perfilConectado = clientesConectados.get( ((AuthToken)me).getNombreUsuario() ).getPefil();
 
-        return (List) daoUsuarios.getAmigos(clientesConectados.get(me).getPefil());
+        return (List) daoUsuarios.getAmigos(perfilConectado);
     }
 
     @Override
@@ -90,107 +101,83 @@ public class Server extends UnicastRemoteObject implements IServer {
         List<IProfile> amigos = getFriends(me);
 
         IProfile amigo = null;
-        for(IProfile a: amigos)
-            if(a.getName().equals(name))
+        for (IProfile a : amigos)
+            if (a.getName().equals(name))
                 amigo = a;
 
-        if(amigo==null)
+        if (amigo == null)
             throw new IllegalArgumentException("Esa persona no es tu amigo");
-        if(!amigo.isConnected())
+        if (!amigo.isConnected())
             throw new IllegalArgumentException("Tu amigo no está conectado");
+        if(!clientesConectados.containsKey(name))
+            throw new IllegalArgumentException("Tu amigo no esta conectado");
 
-
-        AuthToken token = null;
-        for(AuthToken aut: clientesConectados.keySet())
-            if(aut.getNombreUsuario().equals(amigo.getName())) {
-                token = aut;
-                break;
-            }
-
-        if(token ==null)
-            throw new IllegalArgumentException("Tu amigo no está conectado");
-
-        return clientesConectados.get(token).getClient();
-
+        return clientesConectados.get(name).getClient();
     }
 
     @Override
     public void sendFriendshiptRequest(IAuthToken me, String name) throws RemoteException {
 
-        if(!this.clientesConectados.containsKey(me))
-            throw new IllegalArgumentException("usuario no conectado");
-        if(getFriends(me).contains(new Profile(name)))
+        if (!checkConectado(me))
+            throw new IllegalArgumentException("Usuario no conectado");
+        if (getFriends(me).contains(new Profile(name)))
             throw new IllegalArgumentException("Este persone ya está en la lista o listo de amigues");
 
-
-        Profile enviador = this.clientesConectados.get(me).getPefil();
+        Profile enviador = this.clientesConectados.get(((AuthToken)me).getNombreUsuario()).getPefil();
         Profile receptor = new Profile(name);
-
-        this.daoUsuarios.anhadirPeticion(enviador,receptor);
+        this.daoUsuarios.anhadirPeticion(enviador, receptor);
 
     }
 
     @Override
     public List<IProfile> getFriendShipRequest(IAuthToken me) throws RemoteException {
 
-        if(!this.clientesConectados.containsKey(me))
+        if (!checkConectado(me))
             throw new IllegalArgumentException("usuario no conectado");
 
-        return (List)daoUsuarios.getPeticionesPendientes(this.clientesConectados.get(me).getPefil());
+        Profile perfilConectado = clientesConectados.get(((AuthToken)me).getNombreUsuario()).getPefil();
+        return (List) daoUsuarios.getPeticionesPendientes(perfilConectado);
     }
 
     @Override
     public void sendUnFriendshiptRequest(IAuthToken me, String name) throws RemoteException {
 
-        if(!this.clientesConectados.containsKey(me))
+        if (!checkConectado(me))
             throw new IllegalArgumentException("usuario no conectado");
-        if(getFriends(me).contains(new Profile(name)))
+        if (getFriends(me).contains(new Profile(name)))
             throw new IllegalArgumentException("Esta perosona no está en tu lista de amigos");
 
-        daoUsuarios.borrarAmigo(this.clientesConectados.get(me).getPefil(),new Profile(name));
+        Profile autenticado = clientesConectados.get( ((AuthToken)me).getNombreUsuario()).getPefil();
+        daoUsuarios.borrarAmigo(autenticado, new Profile(name));
     }
 
     @Override
     public void acceptFriendPetition(IAuthToken me, IProfile amigo) throws RemoteException {
 
-        if(!this.clientesConectados.containsKey(me))
+        if (!checkConectado(me))
             throw new IllegalArgumentException("usuario no conectado");
-        if(!getFriendShipRequest(me).contains(amigo))
+        if (!getFriendShipRequest(me).contains(amigo))
             throw new IllegalArgumentException("ese usuario no esta en la lista de peticiones");
 
-        Profile aceptador = this.clientesConectados.get(me).getPefil();
-
-
-        daoUsuarios.borrarPeticion((Profile)amigo,aceptador);
-        daoUsuarios.anhadirAmigo((Profile)amigo,aceptador);
-
-        for(TimedClient c : clientesConectados.values())
-            if(c.getPefil().equals(amigo)){
-                try{
-                    c.getClient().notifyFriendListUpdates();
-                }catch (RemoteException e){}
-                break;
-            }
-
+        Profile aceptador = clientesConectados.get( ((AuthToken)me).getNombreUsuario() ).getPefil();
+        daoUsuarios.borrarPeticion((Profile) amigo, aceptador);
+        daoUsuarios.anhadirAmigo((Profile) amigo, aceptador);
+        if(clientesConectados.containsKey(amigo.getName()))
+            clientesConectados.get(amigo.getName()).getClient().notifyFriendListUpdates();
     }
 
     @Override
     public List<String> searchUsers(IAuthToken me, String searchInput) throws RemoteException {
 
-        if(!this.clientesConectados.containsKey(me))
+        if (!checkConectado(me))
             throw new IllegalArgumentException("usuario no conectado");
 
-        List<Profile> profiles = daoUsuarios.buscarUsuarios(searchInput);
-        List<String> list = new ArrayList<>();
-
-        for (Profile profile : profiles) {
-            list.add(profile.getName());
-        }
-        return list;
+        return (List) daoUsuarios.buscarUsuarios(searchInput);
     }
 
 
-    public Server(DAOLogin daoLogin, DAOUsuarios daoUsuarios, ConcurrentHashMap clientesConectados) throws RemoteException{
+    public Server(DAOLogin daoLogin, DAOUsuarios daoUsuarios, ConcurrentHashMap clientesConectados) throws
+            RemoteException {
         super();
         this.clientesConectados = clientesConectados;
         this.daoLogin = daoLogin;

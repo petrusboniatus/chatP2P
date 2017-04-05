@@ -6,18 +6,21 @@ import server.daos.Profile;
 /**
  * Created by pedro on 4/04/17.
  */
-class TimedClient {
+class ClientData {
 
 
+    private IClient client;
+    private int timeLeft;
+    private Profile pefil;
+    private AuthToken token;
 
-    IClient client;
-    int timeLeft;
-    Profile pefil;
+    public ClientData(){}
 
-    public TimedClient(IClient client, int timeLeft, Profile pefil) {
+    public ClientData(IClient client, int timeLeft, Profile pefil, AuthToken token) {
         this.client = client;
         this.timeLeft = timeLeft;
         this.pefil = pefil;
+        this.token = token;
     }
 
     public IClient getClient() {
@@ -44,18 +47,14 @@ class TimedClient {
         this.pefil = pefil;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        TimedClient that = (TimedClient) o;
-
-        return client != null ? client.equals(that.client) : that.client == null;
+    public AuthToken getToken() {
+        return token;
     }
 
-    @Override
-    public int hashCode() {
-        return client != null ? client.hashCode() : 0;
+    public void setToken(AuthToken token) {
+        this.token = token;
     }
+
+
 }
+

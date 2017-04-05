@@ -7,10 +7,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static api.RMI.startRegistry;
 
 /**
  * Created by pedro on 4/04/17.
@@ -23,7 +20,7 @@ public class ServerManager {
     private DAOLogin daoLogin;
     private DAOUsuarios daoUsuarios;
 
-    private ConcurrentHashMap<AuthToken, TimedClient> clientesConectados;
+    private ConcurrentHashMap<AuthToken, ClientData> clientesConectados;
     private Thread hiloLimpiador;
     private LimpiadorClientesConectados limpiador;
 
@@ -73,14 +70,14 @@ public class ServerManager {
             e.printStackTrace();
         }
 
-
-        limpiador.desconectarClientes();
-
         try {
+            limpiador.finalizarHilo();
             hiloLimpiador.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        limpiador.desconectarClientes();
 
     }
 

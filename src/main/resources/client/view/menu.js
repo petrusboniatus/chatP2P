@@ -12,7 +12,7 @@ var controller = {
 };
 
 function main() {
-    updateFriends();
+
 }
 
 function updateFriends() {

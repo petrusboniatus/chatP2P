@@ -1,5 +1,6 @@
 package server.daos;
 
+import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
 
 /**
@@ -8,9 +9,11 @@ import org.mongodb.morphia.annotations.Reference;
 public class CryptedPass {
 
 
-    @Reference
+    @Id
     private String usuario;
     private String encryptedPass;
+
+    public CryptedPass() {}
 
     public CryptedPass(String usuario, String encryptedPass) {
         this.usuario = usuario;

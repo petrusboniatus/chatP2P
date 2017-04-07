@@ -16,35 +16,36 @@ public class Main {
     public static void main(String[] args) {
 
 
-        InputStreamReader is = new InputStreamReader(System.in);
-        BufferedReader br = new BufferedReader(is);
         String portNum;
         String registryURL = "localhost";
         int RMIPortNum = 0;
 
         System.out.println("Introduce el numero de puerto");
-        try {
-            portNum = (br.readLine()).trim();
-            RMIPortNum = Integer.parseInt(portNum);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        portNum = (readLine()).trim();
+        RMIPortNum = Integer.parseInt(portNum);
 
         ServerManager servidor = new ServerManager(RMIPortNum, registryURL);
 
         servidor.inicializar();
 
+        System.out.println("Escribe <salir> para salir");
         String salir = "";
-        try {
-            System.out.println("Escribe <salir> para salir");
-            while (!salir.equals("salir"))
-                salir = br.readLine();
 
+        while (!salir.equals("salir"))
+            salir = readLine();
+
+        servidor.apagar();
+    }
+
+    private static String readLine() {
+        InputStreamReader is = new InputStreamReader(System.in);
+        BufferedReader br = new BufferedReader(is);
+        try {
+            return br.readLine();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            servidor.apagar();
+            return "";
         }
-
     }
 }

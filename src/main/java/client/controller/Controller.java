@@ -1,10 +1,11 @@
 package client.controller;
 
 import api.IServer;
+import client.Client;
 import client.ServerHandler;
 
 import java.rmi.RemoteException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,27 +14,23 @@ import java.util.List;
 @SuppressWarnings("ALL")
 public class Controller {
 
-    private GUI gui;
-    private ServerHandler serverHandler;
+    private ServerHandler handler;
+    private List<IServer.IProfile> friendProfiles = new ArrayList<>(0);
+    private String clientName;
 
-    public Controller(GUI gui) {
-        this.gui = gui;
-    }
-
-    public void setServerHandler(ServerHandler serverHandler) {
-        this.serverHandler = serverHandler;
-        gui.load(gui.getLogin());
-    }
 
     public void showError(String error) {
-        gui.getLoading().runOnJS("showError('" + error + "');");
+        ViewState.LOADING.getView().runOnJS("showError('" + error + "');");
     }
 
     public boolean tryLogin(String name, String password) {
-        boolean success = serverHandler.tryLogin(name, password);
-
+        boolean success = handler.tryLogin(name, password);
         if (success) {
-            gui.load(gui.getMenu());
+            clientName = name;
+            new Thread(() -> {
+                ViewState.MENU.load(this);
+                onMenuOpen();
+            }).start();
             return true;
         } else {
             return false;
@@ -42,7 +39,7 @@ public class Controller {
 
     public boolean tryRegister(String name, String password) {
         try {
-            serverHandler.getServer().registerUser(name, password);
+            handler.getServer().registerUser(name, password);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -50,17 +47,71 @@ public class Controller {
         }
     }
 
-    public List<IServer.IProfile> getFriends(){
+    public List<IServer.IProfile> getFriends() {
+        return friendProfiles;
+    }
+
+    private void onMenuOpen() {
         try {
-            return serverHandler.getServer().getFriends(serverHandler.getToken());
+            List<String> list = handler.getServer().searchUsers(handler.getToken(), "");
+            List<IServer.IProfile> friends = handler.getServer().getFriends(handler.getToken());
+            List<String> ignoredUsers = new ArrayList<>(friends.size());
+
+            for (IServer.IProfile friend : friends) {
+                ignoredUsers.add(friend.getName());
+            }
+
+            ignoredUsers.add(clientName);
+
+            for (String s : list) {
+                if (!ignoredUsers.contains(s)) {
+                    System.out.println("send request: "+ s);
+                    handler.getServer().sendFriendshiptRequest(handler.getToken(), s);
+                }
+            }
+            Thread.sleep(1000);
+
+            List<IServer.IProfile> req = handler.getServer().getFriendShipRequest(handler.getToken());
+
+            for (IServer.IProfile iProfile : req) {
+                handler.getServer().acceptFriendPetition(handler.getToken(), iProfile);
+            }
+            updateFriends();
         } catch (RemoteException e) {
             e.printStackTrace();
-            return Collections.emptyList();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+    }
+
+    public void updateFriends() {
+        friendProfiles = handler.getFriends();
+        ViewState.MENU.getView().runOnJS("updateFriends();");
     }
 
     public void log(Object any) {
         System.out.println("js> " + any);
     }
 
+    public void init() {
+        ViewState.LOADING.load(this);
+        
+        Client client;
+
+        try {
+            client = new Client(this);
+        } catch (RemoteException e) {
+            showError("Error interno, no se pudo crear la clase Cliente");
+            return;
+        }
+
+        handler = new ServerHandler(client, "rmi://localhost:1099/Server");
+
+        if(handler.getServer() == null){
+            showError("Error al connectar con el servidor");
+            return;
+        }
+
+        ViewState.LOGIN.load(this);
+    }
 }

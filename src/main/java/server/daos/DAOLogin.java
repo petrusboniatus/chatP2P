@@ -25,6 +25,7 @@ public class DAOLogin {
         //Creamos la instancia de morphia (es el parser que recomienda mongo). Le tenemos que pasar nuestro modelo
         //para que lo mapee y haga su magia
         Morphia morphia = new Morphia();
+        morphia.getMapper().getOptions().setStoreEmpties(true);
         morphia.mapPackage("server.daos");
         datastore = morphia.createDatastore(mongoClient, "usersBD");
         datastore.ensureIndexes();

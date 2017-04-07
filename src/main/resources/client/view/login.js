@@ -39,7 +39,6 @@ function main() {
             node.innerHTML = "<h3>Error, las contraseñas no coinciden!</h3>";
             node.style.display = "block";
         } else {
-            controller.log("sfghajdgh");
             let success = controller.tryRegister(name, pass);
             if (!success) {
                 let subNode = document.getElementById("message");

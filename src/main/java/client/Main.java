@@ -1,8 +1,6 @@
 package client;
 
-import client.controller.GUI;
-
-import java.rmi.RemoteException;
+import client.controller.Controller;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
@@ -10,26 +8,9 @@ import java.rmi.RemoteException;
 public class Main {
 
     public static void main(String[] args) {
-        GUI gui = new GUI();
+        Controller ctr = new Controller();
 
-        gui.init();
-
-        Client client;
-
-        try {
-            client = new Client();
-        } catch (RemoteException e) {
-            gui.getController().showError("Error interno, no se pudo crear la clase Cliente");
-            return;
-        }
-
-        ServerHandler handler = new ServerHandler(client, "rmi://localhost:1099/Server");
-
-        if(handler.getServer() == null){
-            gui.getController().showError("Error al connectar con el servidor");
-            return;
-        }
-
-        gui.getController().setServerHandler(handler);
+        ctr.init();
     }
+
 }

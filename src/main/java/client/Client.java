@@ -1,6 +1,7 @@
 package client;
 
 import api.IClient;
+import client.controller.Controller;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
@@ -11,22 +12,15 @@ import java.rmi.server.UnicastRemoteObject;
  */
 public class Client extends UnicastRemoteObject implements IClient, Serializable {
 
-    private FriendManager manager;
+    private Controller manager;
 
-    protected Client() throws RemoteException {}
+    public Client(Controller manager) throws RemoteException {
+        this.manager = manager;
+    }
 
     @Override
     public void notifyFriendListUpdates() throws RemoteException {
-        if (manager != null) {
-            manager.updateFriends();
-        }
-    }
-
-    public FriendManager getManager() {
-        return manager;
-    }
-
-    public void setManager(FriendManager manager) {
-        this.manager = manager;
+        System.out.println("Friends changed");
+        manager.updateFriends();
     }
 }

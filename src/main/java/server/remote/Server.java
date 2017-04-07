@@ -79,7 +79,7 @@ public class Server extends UnicastRemoteObject implements IServer {
         usuario.setOnline(true);
         clientesConectados.put(name, new ClientData(me, ACTUALIZACIONES, usuario, nuevaAut));
         daoUsuarios.actualizarUsuario(usuario);
-
+        
         return nuevaAut;
 
     }

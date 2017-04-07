@@ -88,7 +88,7 @@ public interface IServer extends Remote {
      */
     List<String> searchUsers(IAuthToken me, String searchInput) throws RemoteException;
 
-    interface IAuthToken {
+    interface IAuthToken extends Serializable {
         // El servidor implementa esto como quiera
     }
 

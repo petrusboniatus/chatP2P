@@ -1,5 +1,6 @@
 package server.remote;
 
+import client.Client;
 import server.daos.DAOUsuarios;
 import server.daos.Profile;
 
@@ -51,15 +52,21 @@ public class LimpiadorClientesConectados implements Runnable {
                         entrada.getValue().getPefil().setOnline(false);
                         daoUsuarios.actualizarUsuario(entrada.getValue().getPefil());
 
-
-                        try {
                             for (Profile profile : daoUsuarios.getAmigos(entrada.getValue().getPefil())) {
 
-                                mapaALimpiar.get(profile.getName()).getClient().notifyFriendListUpdates();
+
+                                ClientData c = mapaALimpiar.get(profile.getName());
+
+
+                                try {
+                                    if (c.getTimeLeft() != 0)
+                                        c.getClient().notifyFriendListUpdates();
+                                }catch (RemoteException e){
+                                    c.setTimeLeft(0);
+                                }
+
                             }
-                        } catch (RemoteException e) {
-                            //Ingonre this
-                        }
+
 
                         mapaALimpiar.remove(entrada.getKey());
                     }

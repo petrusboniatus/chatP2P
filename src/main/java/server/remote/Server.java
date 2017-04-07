@@ -41,7 +41,7 @@ public class Server extends UnicastRemoteObject implements IServer {
     public void imAlive(IAuthToken me) throws RemoteException {
 
         if (!checkConectado(me))
-            throw new IllegalArgumentException("No es un cliente logueado");
+            throw new IllegalArgumentException("ya no estas logueado");
 
         clientesConectados.get( ((AuthToken)me).getNombreUsuario() ).setTimeLeft(ACTUALIZACIONES);
     }

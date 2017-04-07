@@ -54,6 +54,7 @@ public class LimpiadorClientesConectados implements Runnable {
 
                         try {
                             for (Profile profile : daoUsuarios.getAmigos(entrada.getValue().getPefil())) {
+
                                 mapaALimpiar.get(profile.getName()).getClient().notifyFriendListUpdates();
                             }
                         } catch (RemoteException e) {

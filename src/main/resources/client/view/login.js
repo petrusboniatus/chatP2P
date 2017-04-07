@@ -19,7 +19,7 @@ function main() {
 
         let success = controller.tryLogin(name, pass);
 
-        if (success) {
+        if (!success) {
             let node = document.getElementById("message");
             node.innerHTML = "<h3>Error, usuario o constraseña invalida</h3>";
             node.style.display = "block";

@@ -2,7 +2,6 @@ package client;
 
 import api.IServer;
 import api.RMI;
-import client.controller.ViewState;
 
 import java.rmi.RemoteException;
 import java.util.Collections;
@@ -11,7 +10,7 @@ import java.util.List;
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
  */
-public class ServerHandler {
+public class ServerConnection {
 
     private String url;
     private IServer server = null;
@@ -19,7 +18,7 @@ public class ServerHandler {
     private IServer.IAuthToken token;
     private Thread alive;
 
-    public ServerHandler(Client client, String url) {
+    public ServerConnection(Client client, String url) {
         this.url = url;
         this.client = client;
         alive = new Thread(this::notifyServer);
@@ -30,7 +29,6 @@ public class ServerHandler {
             token = server.login(client, name, password);
             alive.start();
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
         return true;
@@ -43,7 +41,7 @@ public class ServerHandler {
                 getServer().imAlive(token);
             } catch (Exception e) {
                 e.printStackTrace();
-                server = null;
+                System.out.println("Error al connectar, reconnectando...");
                 break;
             }
             try {
@@ -52,6 +50,12 @@ public class ServerHandler {
                 e.printStackTrace();
             }
         }
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        client.getManager().connectToServer();
     }
 
     public IServer.IAuthToken getToken() {
@@ -67,7 +71,7 @@ public class ServerHandler {
 
     public List<IServer.IProfile> getFriends() {
         try {
-             return getServer().getFriends(token);
+            return getServer().getFriends(token);
         } catch (RemoteException e) {
             e.printStackTrace();
             return Collections.emptyList();

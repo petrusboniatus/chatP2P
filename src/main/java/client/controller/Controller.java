@@ -2,7 +2,7 @@ package client.controller;
 
 import api.IServer;
 import client.Client;
-import client.ServerHandler;
+import client.ServerConnection;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -14,10 +14,13 @@ import java.util.List;
 @SuppressWarnings("ALL")
 public class Controller {
 
-    private ServerHandler handler;
+    private ServerConnection handler;
     private List<IServer.IProfile> friendProfiles = new ArrayList<>(0);
     private String clientName;
 
+    public void openTab(){
+        ViewState.MENU.getView().runOnJS("loadTab(list);");
+    }
 
     public void showError(String error) {
         ViewState.LOADING.getView().runOnJS("showError('" + error + "');");
@@ -25,6 +28,7 @@ public class Controller {
 
     public boolean tryLogin(String name, String password) {
         boolean success = handler.tryLogin(name, password);
+
         if (success) {
             clientName = name;
             new Thread(() -> {
@@ -93,7 +97,7 @@ public class Controller {
         System.out.println("js> " + any);
     }
 
-    public void init() {
+    public void connectToServer() {
         ViewState.LOADING.load(this);
         
         Client client;
@@ -105,7 +109,7 @@ public class Controller {
             return;
         }
 
-        handler = new ServerHandler(client, "rmi://localhost:1099/Server");
+        handler = new ServerConnection(client, "rmi://localhost:1099/Server");
 
         if(handler.getServer() == null){
             showError("Error al connectar con el servidor");

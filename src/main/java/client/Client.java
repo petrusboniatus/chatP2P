@@ -23,4 +23,8 @@ public class Client extends UnicastRemoteObject implements IClient, Serializable
         System.out.println("Friends changed");
         manager.updateFriends();
     }
+
+    public Controller getManager() {
+        return manager;
+    }
 }

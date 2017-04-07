@@ -11,33 +11,7 @@
     <script src="jquery/includes/jquery.js"></script>
     <script src="jquery/jquery.scrollbar.js"></script>
 
-    <script type="text/javascript">
-        jQuery(document).ready(function () {
-            jQuery('.scrollbar-inner').scrollbar();
-        });
-        function main() {
-
-        }
-
-        function updateFriends() {
-            let list = controller.getFriends();
-            let node = document.getElementById("user-list");
-            node.innerHTML = "";
-
-            for (let i = 0; i < list.size(); i++) {
-                let newNode = document.createElement("div");
-                let connected = list.get(i).isConnected();
-                if (connected) {
-                    newNode.classList.add("conectado");
-                } else {
-                    newNode.classList.add("desconectado");
-                }
-
-                newNode.innerText = list.get(i).getName();
-                node.appendChild(newNode);
-            }
-        }
-    </script>
+    <script src="chat.js"></script>
 </head>
 
 <body style="margin: 0; padding: 0">
@@ -47,7 +21,7 @@
     </div>
 
     <div style="width: 80%;height: 100%; display: flex; margin-left: 1em; margin-top: 1em">
-        <div class="scrollbar-inner" style="width: 100%">
+        <div id="text" class="scrollbar-inner" style="width: 100%">
 
 
             <p style="font-style: italic;">Persone:</p>

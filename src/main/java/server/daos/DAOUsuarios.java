@@ -32,6 +32,11 @@ public class DAOUsuarios {
         morphia.mapPackage("server.daos");
         datastore = morphia.createDatastore(mongoClient, "usersBD");
         datastore.ensureIndexes();
+
+        datastore.findAndModify(
+                datastore.find(Profile.class),
+                datastore.createUpdateOperations(Profile.class).set("online",false)
+        );
     }
 
 

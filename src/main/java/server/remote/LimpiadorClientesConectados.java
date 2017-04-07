@@ -29,7 +29,6 @@ public class LimpiadorClientesConectados implements Runnable {
     }
 
     public void desconectarClientes() {
-
         for (ClientData entrada : mapaALimpiar.values()) {
             entrada.getPefil().setOnline(false);
             daoUsuarios.actualizarUsuario(entrada.getPefil());

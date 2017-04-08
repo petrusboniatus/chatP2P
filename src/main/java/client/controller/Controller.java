@@ -2,6 +2,7 @@ package client.controller;
 
 import api.IServer;
 import client.Client;
+import api.Defaults;
 import client.ServerHandler;
 
 import java.rmi.RemoteException;
@@ -105,7 +106,7 @@ public class Controller {
             return;
         }
 
-        handler = new ServerHandler(client, "rmi://localhost:1099/Server");
+        handler = new ServerHandler(client, Defaults.clientURL);
 
         if(handler.getServer() == null){
             showError("Error al connectar con el servidor");

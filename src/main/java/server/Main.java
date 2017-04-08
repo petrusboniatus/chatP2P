@@ -1,12 +1,11 @@
 package server;
 
-import server.remote.Server;
+import api.Defaults;
 import server.remote.ServerManager;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
@@ -16,16 +15,16 @@ public class Main {
     public static void main(String[] args) {
 
 
-        String portNum;
-        String registryURL = "localhost";
-        int RMIPortNum = 0;
+//        String portNum;
+//        String registryURL = "localhost";
+//        int RMIPortNum = 0;
+//
+//        System.out.println("Introduce el numero de puerto");
+//
+//        portNum = (readLine()).trim();
+//        RMIPortNum = Integer.parseInt(portNum);
 
-        System.out.println("Introduce el numero de puerto");
-
-        portNum = (readLine()).trim();
-        RMIPortNum = Integer.parseInt(portNum);
-
-        ServerManager servidor = new ServerManager(RMIPortNum, registryURL);
+        ServerManager servidor = new ServerManager(Defaults.serverPort, Defaults.serverHost);
 
         servidor.inicializar();
 

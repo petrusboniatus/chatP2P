@@ -1,5 +1,6 @@
 package server.daos;
 
+import api.Defaults;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.mongodb.morphia.Datastore;
@@ -15,9 +16,9 @@ public class DAOLogin {
     private Datastore datastore;
 
 
-    public void inicializar(){
+    public void inicializar() {
         // To connect to mongodb server
-        mongoClient = new MongoClient( "localhost" , 27017 );
+        mongoClient = new MongoClient(Defaults.databaseHost, Defaults.databasePort);
 
         // Nos bajamos una BD
         mongoDatabase = mongoClient.getDatabase("usersBD");
@@ -32,21 +33,20 @@ public class DAOLogin {
     }
 
 
-    public void setCryptedPass(String usuario, String cryptedPass){
+    public void setCryptedPass(String usuario, String cryptedPass) {
         datastore.save(new CryptedPass(usuario, cryptedPass));
     }
 
-    public String getCryptedPass(String usuario){
+    public String getCryptedPass(String usuario) {
 
         CryptedPass pass = datastore.createQuery(CryptedPass.class).field("usuario").equal(usuario).get();
 
-        if(pass != null)
+        if (pass != null) {
             return pass.getEncryptedPass();
-        else
+        } else {
             return null;
+        }
     }
-
-
 
 
 }

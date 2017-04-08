@@ -37,7 +37,13 @@ public class DAOLogin {
     }
 
     public String getCryptedPass(String usuario){
-        return datastore.createQuery(CryptedPass.class).field("usuario").equal(usuario).get().getEncryptedPass();
+
+        CryptedPass pass = datastore.createQuery(CryptedPass.class).field("usuario").equal(usuario).get();
+
+        if(pass != null)
+            return pass.getEncryptedPass();
+        else
+            return null;
     }
 
 

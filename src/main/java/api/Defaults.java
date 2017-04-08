@@ -10,6 +10,6 @@ public class Defaults {
     public static final String serverName = "Server";
     public static final String clientURL = "rmi://" + serverHost + ":" + serverPort + "/" + serverName;
 
-    public static final String databaseHost = "localhost";
+    public static final String databaseHost = "192.168.1.40";
     public static final int databasePort = 27017;
 }

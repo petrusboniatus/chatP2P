@@ -69,7 +69,7 @@ public class Server extends UnicastRemoteObject implements IServer {
 
         if (clave == null)
             throw new IllegalArgumentException("El usuario no está registrado");
-        if (Security.checkPassword(password, clave))
+        if (!Security.checkPassword(password, clave))
             throw new IllegalArgumentException("La clave es erronea");
 
 

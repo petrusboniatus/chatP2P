@@ -30,6 +30,7 @@ public class Controller {
     public boolean tryLogin(String name, String password) {
         boolean success = handler.tryLogin(name, password);
 
+        System.out.println("success = " + success);
         if (success) {
             clientName = name;
             new Thread(() -> {

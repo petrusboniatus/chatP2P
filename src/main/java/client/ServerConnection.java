@@ -29,6 +29,7 @@ public class ServerConnection {
             token = server.login(client, name, password);
             alive.start();
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
         return true;

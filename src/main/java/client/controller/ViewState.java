@@ -20,19 +20,19 @@ public enum ViewState {
 
     private String path;
 
-    ViewState(String path){
+    ViewState(String path) {
         this.path = path;
     }
 
-    public void load(Controller ctrl){
+    public void load(Controller ctrl) {
         View view = getView();
-
+        System.out.println("cargando vista: " + view.getHtmlUrl());
         view.addObjectOnJS("controller", ctrl);
         handler.show(view);
     }
 
     public View getView() {
-        if(!cache.containsKey(path)){
+        if (!cache.containsKey(path)) {
             View view = handler.loadView(path);
             cache.put(path, view);
         }

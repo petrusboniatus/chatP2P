@@ -12,7 +12,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-
+/*Creado por Pedro Bueno*/
 
 @SuppressWarnings("unchecked")
 public class Server extends UnicastRemoteObject implements IServer {

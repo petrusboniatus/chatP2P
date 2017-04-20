@@ -43,7 +43,7 @@ public class Server extends UnicastRemoteObject implements IServer {
 
         for (Profile profile : daoUsuarios.getAmigos(perfil) ){
 
-            if (clientesConectados.contains(profile.getName())) {
+            if (clientesConectados.containsKey(profile.getName())) {
 
                 ClientData c = clientesConectados.get(profile.getName());
                 try {

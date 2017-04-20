@@ -12,7 +12,15 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-/*Creado por Pedro Bueno*/
+/*
+* TODO
+* Search users bug
+* Connected users bug
+* Los clientes no se eliminan
+* Las conexiones de los clientes tienen problemas
+* Hay que meter la función cambiar contraseña
+* get connected friends no funciona simpre
+* */
 
 @SuppressWarnings("unchecked")
 public class Server extends UnicastRemoteObject implements IServer {

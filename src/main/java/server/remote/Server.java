@@ -26,6 +26,7 @@ public class Server extends UnicastRemoteObject implements IServer {
     private RandomString random = new RandomString();
 
 
+    
     private boolean checkConectado(IAuthToken he) {
 
         AuthToken sub = (AuthToken) he;
@@ -36,6 +37,25 @@ public class Server extends UnicastRemoteObject implements IServer {
             return false;
         }
 
+    }
+
+    private void notificarAmigos(Profile perfil){
+
+        for (Profile profile : daoUsuarios.getAmigos(perfil) ){
+
+            if (clientesConectados.contains(profile.getName())) {
+
+                ClientData c = clientesConectados.get(profile.getName());
+                try {
+                    if (c.getTimeLeft() != 0)
+                        c.getClient().notifyFriendListUpdates();
+                } catch (RemoteException e) {
+                    c.setTimeLeft(0);
+                }
+
+            }
+
+        }
     }
 
 
@@ -82,6 +102,8 @@ public class Server extends UnicastRemoteObject implements IServer {
         usuario.setOnline(true);
         clientesConectados.put(name, new ClientData(me, ACTUALIZACIONES, usuario, nuevaAut));
         daoUsuarios.actualizarUsuario(usuario);
+
+        notificarAmigos(usuario);
         
         return nuevaAut;
 

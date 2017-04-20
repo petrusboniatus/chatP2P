@@ -33,12 +33,22 @@ public class DAOUsuarios {
         datastore = morphia.createDatastore(mongoClient, "usersBD");
         datastore.ensureIndexes();
 
-        datastore.findAndModify(
+        desconectarTodosUsuarios();
+    }
+
+    public void desconectarTodosUsuarios(){
+        datastore.update(
                 datastore.find(Profile.class),
                 datastore.createUpdateOperations(Profile.class).set("online", false)
         );
     }
 
+    public void desconectarCliente(Profile perfil){
+        datastore.findAndModify(
+                datastore.createQuery(Profile.class).field("nombre").equal(perfil.getName()),
+                datastore.createUpdateOperations(Profile.class).set("online", false)
+        );
+    }
 
     public boolean existeUsuario(String nombre) {
         float resultado = datastore.createQuery(Profile.class).field("nombre").equal(nombre).count();

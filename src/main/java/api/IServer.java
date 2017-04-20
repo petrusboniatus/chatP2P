@@ -35,6 +35,17 @@ public interface IServer extends Remote {
     IAuthToken login(IClient me, String name, String password) throws RemoteException;
 
     /**
+     * Cambia la contraseña si coincide con la proporcionada, sinó lanza una excepción
+     *
+     * @param me token de autenticación
+     * @param oldPass vieja contraseña
+     * @param newPass nueva contraseña
+     * @throws RemoteException
+     */
+    void changePassword(IAuthToken me,String oldPass,  String newPass) throws RemoteException;
+
+
+    /**
      * Se piden los amigos connectados
      *
      * @param me token autentificacion

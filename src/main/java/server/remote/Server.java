@@ -26,7 +26,7 @@ public class Server extends UnicastRemoteObject implements IServer {
     private RandomString random = new RandomString();
 
 
-    
+
     private boolean checkConectado(IAuthToken he) {
 
         AuthToken sub = (AuthToken) he;

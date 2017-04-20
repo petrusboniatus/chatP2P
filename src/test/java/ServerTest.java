@@ -219,6 +219,41 @@ public class ServerTest {
     }
 
 
+    @Test
+    public void notification(){
+        insertUsers();
+
+        try {
+            IClient c1 = new ClientTest("usuario1");
+            IClient c2 = new ClientTest("usuario2");
+
+            IServer.IAuthToken t1 = server.login(c1, "usuario1", "usr2");
+            IServer.IAuthToken t2 = server.login(c2, "usuario2", "usr");
+
+            server.sendFriendshiptRequest(t1, "usuario2");
+
+
+            List<IServer.IProfile> peticiones = server.getFriendShipRequest(t2);
+            server.acceptFriendPetition(t2, peticiones.get(0));
+            ((ClientTest) c1).notificado = false;
+
+            Thread.sleep(4000);
+            server.imAlive(t1);
+
+            Thread.sleep(4000);
+            server.imAlive(t1);
+            t2 = server.login(c2, "usuario2", "usr");
+
+            Assert.assertTrue(((ClientTest) c1).notificado);
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        close();
+        dropTables();
+    }
 
 
 }

@@ -12,20 +12,13 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-/*
-* TODO
-* Search users bug
-* Connected users bug
-* Los clientes no se eliminan
-* Las conexiones de los clientes tienen problemas
-* Hay que meter la función cambiar contraseña
-* get connected friends no funciona simpre
-* */
+import java.util.stream.Collectors;
+
 
 @SuppressWarnings("unchecked")
 public class Server extends UnicastRemoteObject implements IServer {
 
-    private static final int ACTUALIZACIONES = 2; //Lo que tarda en borrarse del servidor si no hay renovación
+    private static final int ACTUALIZACIONES = 5; //Lo que tarda en borrarse del servidor si no hay renovación
 
     private ConcurrentHashMap<String, ClientData> clientesConectados;
     private DAOLogin daoLogin;
@@ -44,6 +37,8 @@ public class Server extends UnicastRemoteObject implements IServer {
         }
 
     }
+
+
 
     @Override
     public void imAlive(IAuthToken me) throws RemoteException {
@@ -89,6 +84,20 @@ public class Server extends UnicastRemoteObject implements IServer {
         daoUsuarios.actualizarUsuario(usuario);
         
         return nuevaAut;
+
+    }
+
+    @Override
+    public void changePassword(IAuthToken me, String oldPass, String newPass) throws RemoteException {
+
+        String clave = daoLogin.getCryptedPass( ((AuthToken)me).getNombreUsuario());
+
+        if (!checkConectado(me))
+            throw new IllegalArgumentException("No es un cliente logueado");
+        if (!Security.checkPassword(oldPass, clave))
+            throw new IllegalArgumentException("La contraseña no coincide");
+
+        daoLogin.setCryptedPass( ((AuthToken)me).getNombreUsuario() , Security.encrypt(newPass) );
 
     }
 
@@ -152,7 +161,7 @@ public class Server extends UnicastRemoteObject implements IServer {
 
         if (!checkConectado(me))
             throw new IllegalArgumentException("usuario no conectado");
-        if (getFriends(me).contains(new Profile(name)))
+        if (!getFriends(me).contains(new Profile(name)))
             throw new IllegalArgumentException("Esta perosona no está en tu lista de amigos");
 
         Profile autenticado = clientesConectados.get( ((AuthToken)me).getNombreUsuario()).getPefil();
@@ -169,6 +178,7 @@ public class Server extends UnicastRemoteObject implements IServer {
 
         Profile aceptador = clientesConectados.get( ((AuthToken)me).getNombreUsuario() ).getPefil();
         daoUsuarios.borrarPeticion((Profile) amigo, aceptador);
+        daoUsuarios.borrarPeticion(aceptador, (Profile) amigo);
         daoUsuarios.anhadirAmigo((Profile) amigo, aceptador);
         if(clientesConectados.containsKey(amigo.getName()))
             clientesConectados.get(amigo.getName()).getClient().notifyFriendListUpdates();
@@ -180,7 +190,10 @@ public class Server extends UnicastRemoteObject implements IServer {
         if (!checkConectado(me))
             throw new IllegalArgumentException("usuario no conectado");
 
-        return (List) daoUsuarios.buscarUsuarios(searchInput);
+        return daoUsuarios.buscarUsuarios(searchInput)
+                .stream()
+                .map(i -> i.getName())
+                .collect(Collectors.toList());
     }
 
 

@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LimpiadorClientesConectados implements Runnable {
 
-    private static final int TIEMPO_ENTRE_LIMPIEZA = 5_000;
+    private static final int TIEMPO_ENTRE_LIMPIEZA = 1_000;
 
     private ConcurrentHashMap<String, ClientData> mapaALimpiar;
     private DAOUsuarios daoUsuarios;
@@ -31,10 +31,7 @@ public class LimpiadorClientesConectados implements Runnable {
     }
 
     public void desconectarClientes() {
-        for (ClientData entrada : mapaALimpiar.values()) {
-            entrada.getPefil().setOnline(false);
-            daoUsuarios.actualizarUsuario(entrada.getPefil());
-        }
+        daoUsuarios.desconectarTodosUsuarios();
     }
 
     @Override
@@ -43,6 +40,7 @@ public class LimpiadorClientesConectados implements Runnable {
             try {
                 Thread.sleep(TIEMPO_ENTRE_LIMPIEZA);
 
+
                 for (Map.Entry<String, ClientData> entrada : mapaALimpiar.entrySet()) {
 
                     entrada.getValue().setTimeLeft(entrada.getValue().getTimeLeft() - 1);
@@ -50,22 +48,23 @@ public class LimpiadorClientesConectados implements Runnable {
                     if (entrada.getValue().getTimeLeft() == 0) {
 
                         entrada.getValue().getPefil().setOnline(false);
-                        daoUsuarios.actualizarUsuario(entrada.getValue().getPefil());
+                        daoUsuarios.desconectarCliente(entrada.getValue().getPefil());
 
-                            for (Profile profile : daoUsuarios.getAmigos(entrada.getValue().getPefil())) {
-
-
-                                ClientData c = mapaALimpiar.get(profile.getName());
+                        for (Profile profile : daoUsuarios.getAmigos(entrada.getValue().getPefil())) {
 
 
+                            ClientData c = mapaALimpiar.get(profile.getName());
+
+                            if (c != null) {
                                 try {
                                     if (c.getTimeLeft() != 0)
                                         c.getClient().notifyFriendListUpdates();
-                                }catch (RemoteException e){
+                                } catch (RemoteException e) {
                                     c.setTimeLeft(0);
                                 }
-
                             }
+
+                        }
 
 
                         mapaALimpiar.remove(entrada.getKey());

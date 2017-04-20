@@ -6,7 +6,7 @@ import server.daos.Profile;
 /**
  * Created by pedro on 4/04/17.
  */
-class ClientData {
+public class ClientData {
 
 
     private IClient client;

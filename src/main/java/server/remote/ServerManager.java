@@ -32,6 +32,7 @@ public class ServerManager {
         this.urlRegistro = urlRegistro;
     }
 
+
     public void inicializar() {
 
 
@@ -80,6 +81,7 @@ public class ServerManager {
         limpiador.desconectarClientes();
 
     }
+
 
 
     private static void startRegistry(int RMIPortNum) throws RemoteException {

@@ -1,15 +1,14 @@
 import api.IClient;
+import api.IP2P;
 import api.IServer;
 import client.Client;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
-import com.mongodb.gridfs.CLI;
 import org.junit.Assert;
 import org.junit.Test;
 import server.daos.DAOLogin;
 import server.daos.DAOUsuarios;
-import server.daos.Profile;
-import server.remote.*;
+import server.remote.ClientData;
 import server.remote.LimpiadorClientesConectados;
 import server.remote.Server;
 
@@ -45,6 +44,11 @@ public class ServerTest {
         public void notifyFriendListUpdates() throws RemoteException {
             System.out.print(nomrbe + " ha sido notificado\n");
             notificado = true;
+        }
+
+        @Override
+        public IP2P getP2P() throws RemoteException {
+            return null;
         }
     }
 

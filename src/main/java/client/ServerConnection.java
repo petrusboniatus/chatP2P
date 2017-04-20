@@ -1,5 +1,6 @@
 package client;
 
+import api.IClient;
 import api.IServer;
 import api.RMI;
 
@@ -16,6 +17,7 @@ public class ServerConnection {
     private IServer server = null;
     private Client client = null;
     private IServer.IAuthToken token;
+    private Credentials credentials = null;
     private Thread alive;
 
     public ServerConnection(Client client, String url) {
@@ -27,6 +29,7 @@ public class ServerConnection {
     public boolean tryLogin(String name, String password) {
         try {
             token = server.login(client, name, password);
+            credentials = new Credentials(name, password);
             alive.start();
         } catch (Exception e) {
             e.printStackTrace();
@@ -43,7 +46,13 @@ public class ServerConnection {
             } catch (Exception e) {
                 e.printStackTrace();
                 System.out.println("Error al connectar, reconnectando...");
-                break;
+                try {
+                    token = server.login(client, credentials.getUsername(), credentials.getPassword());
+                    getServer().imAlive(token);
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                    break;
+                }
             }
             try {
                 Thread.sleep(1000);
@@ -76,6 +85,42 @@ public class ServerConnection {
         } catch (RemoteException e) {
             e.printStackTrace();
             return Collections.emptyList();
+        }
+    }
+
+    public IClient connect(IServer.IProfile friend) {
+        try {
+            return getServer().getConnection(token, friend.getName());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<String> searchUsers(String str) {
+        try {
+            return getServer().searchUsers(token, str);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    private class Credentials {
+        private String username;
+        private String password;
+
+        public Credentials(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
+
+        private String getUsername() {
+            return username;
+        }
+
+        private String getPassword() {
+            return password;
         }
     }
 }

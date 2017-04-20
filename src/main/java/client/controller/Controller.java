@@ -1,13 +1,20 @@
 package client.controller;
 
+import api.Defaults;
+import api.IClient;
+import api.IP2P;
 import api.IServer;
 import client.Client;
-import api.Defaults;
+import client.ClientMsg;
+import client.Conversation;
 import client.ServerConnection;
+import com.awesome.business.template.api.Observable;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
@@ -16,12 +23,13 @@ import java.util.List;
 public class Controller {
 
     private ServerConnection handler;
-    private List<IServer.IProfile> friendProfiles = new ArrayList<>(0);
     private String clientName;
+    private Map<String, Conversation> allConversations = new HashMap<>();
 
-    public void openTab(){
-        ViewState.MENU.getView().runOnJS("loadTab(list);");
-    }
+    //Observables
+    public Observable<List<IServer.IProfile>> friendProfiles = new Observable<>(new ArrayList<>(0));
+    public Observable<Conversation> selectedTab = new Observable<>(null);
+    public Observable<List<String>> searchResults = new Observable<>(new ArrayList<>());
 
     public void showError(String error) {
         ViewState.LOADING.getView().runOnJS("showError('" + error + "');");
@@ -30,7 +38,6 @@ public class Controller {
     public boolean tryLogin(String name, String password) {
         boolean success = handler.tryLogin(name, password);
 
-        System.out.println("success = " + success);
         if (success) {
             clientName = name;
             new Thread(() -> {
@@ -54,7 +61,31 @@ public class Controller {
     }
 
     public List<IServer.IProfile> getFriends() {
-        return friendProfiles;
+        return friendProfiles.get();
+    }
+
+    public void searchUsers(String str) {
+        searchResults.set(handler.searchUsers(str));
+    }
+
+    public void sendMsg(String txt) {
+        IClient client = selectedTab.get().getOther();
+        IP2P tunnel = null;
+        try {
+            tunnel = client.getP2P();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return;
+        }
+        ClientMsg msg = new ClientMsg(clientName, txt);
+        Conversation conv = selectedTab.get();
+        conv.getMsgs().add(msg);
+        selectedTab.set(conv);
+        try {
+            tunnel.sendMsg(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private void onMenuOpen() {
@@ -71,8 +102,12 @@ public class Controller {
 
             for (String s : list) {
                 if (!ignoredUsers.contains(s)) {
-                    System.out.println("send request: "+ s);
-                    handler.getServer().sendFriendshiptRequest(handler.getToken(), s);
+                    try {
+                        System.out.println("send request: " + s);
+                        handler.getServer().sendFriendshiptRequest(handler.getToken(), s);
+                    } catch (Exception e) {
+
+                    }
                 }
             }
             Thread.sleep(1000);
@@ -91,8 +126,30 @@ public class Controller {
     }
 
     public void updateFriends() {
-        friendProfiles = handler.getFriends();
-        ViewState.MENU.getView().runOnJS("updateFriends();");
+        friendProfiles.set(handler.getFriends());
+    }
+
+    public void openTab(String name) {
+        IServer.IProfile friend = null;
+        for (IServer.IProfile profile : getFriends()) {
+            if (profile.getName().equals(name)) {
+                friend = profile;
+                break;
+            }
+        }
+
+        if (friend == null || !friend.isConnected()) {
+            return;
+        }
+        if (!allConversations.containsKey(name)) {
+            IClient client = handler.connect(friend);
+            if (client == null) {
+                return;
+            }
+            Conversation c = new Conversation(client);
+            allConversations.put(name, c);
+        }
+        selectedTab.set(allConversations.get(name));
     }
 
     public void log(Object any) {
@@ -101,23 +158,47 @@ public class Controller {
 
     public void connectToServer() {
         ViewState.LOADING.load(this);
-        
+
         Client client;
 
         try {
             client = new Client(this);
         } catch (RemoteException e) {
             showError("Error interno, no se pudo crear la clase Cliente");
+            e.printStackTrace();
             return;
         }
 
         handler = new ServerConnection(client, Defaults.clientURL);
 
-        if(handler.getServer() == null){
+        if (handler.getServer() == null) {
             showError("Error al connectar con el servidor");
             return;
         }
 
         ViewState.LOGIN.load(this);
+    }
+
+    public void receiveMsg(ClientMsg msg) {
+        if (!allConversations.containsKey(msg.getUser())) {
+            IServer.IProfile profile = null;
+            for (IServer.IProfile friend : getFriends()) {
+                if (friend.getName() == msg.getUser()) {
+                    profile = friend;
+                    break;
+                }
+            }
+            if (profile == null) {
+                return;
+            }
+            IClient other = handler.connect(profile);
+            Conversation conv = new Conversation(other);
+            allConversations.put(profile.getName(), conv);
+        }
+        Conversation conv = allConversations.get(msg.getUser());
+        conv.getMsgs().add(msg);
+        if (selectedTab.get() == conv) {
+            selectedTab.set(conv);
+        }
     }
 }

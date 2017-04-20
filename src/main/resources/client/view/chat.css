@@ -160,6 +160,7 @@
 }
 
 .conectado {
+    width: 22.5vw;
     background: lightgreen;
     margin-left: 3px;
     padding-left: 0.5em;
@@ -167,20 +168,36 @@
     margin-bottom: 0;
 }
 
+.conectado:hover {
+    background: #9bff9b;
+}
+
 .desconectado {
+    width: 22.5vw;
     background: lightcoral;
     margin-left: 3px;
     padding-left: 0.5em;
     border-right: solid 2px;
-
 }
 
 .actual {
+    width: 22.5vw;
     padding-left: 0.5em;
     margin-left: 3px;
     background: white;
     border-top: solid 2px;
     border-bottom: solid 2px;
+}
+
+.search-result {
+    width: 22.5vw;
+    padding-left: 0.5em;
+    margin-left: 3px;
+    background: white;
+}
+
+.search-result:hover {
+    background-color: #9acfea;
 }
 
 .scrollbar-inner p {
@@ -193,5 +210,41 @@
 
 .username {
     font-style: italic;
-    color: #2e6da4;
+    color: blue;
+    margin: 0;
+    padding: 0;
+}
+
+.conversation {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 100%;
+    padding: 0;
+    /*margin-left: 1em;*/
+    /*margin-top: 1em*/
+}
+
+.user-search {
+    margin: 0;
+    padding: 0;
+}
+
+.search-section {
+    text-align: center;
+    width: 22.5vw;
+    padding-left: 0.5em;
+    margin-bottom: 3px;
+    background: white;
+}
+
+.debug {
+    outline: solid 1px red;
+}
+
+.debug {
+    outline: solid 1px blue;
+}
+
+.debug {
+    outline: solid 1px yellow;
 }

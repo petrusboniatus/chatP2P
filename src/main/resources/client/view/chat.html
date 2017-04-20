@@ -6,76 +6,39 @@
     <link rel="stylesheet" href="jquery/includes/style.css"/>
     <link rel="stylesheet" href="jquery/includes/prettify/prettify.css"/>
     <link rel="stylesheet" href="chat.css"/>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.css"/>
 
     <script src="jquery/includes/prettify/prettify.js"></script>
     <script src="jquery/includes/jquery.js"></script>
     <script src="jquery/jquery.scrollbar.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
 
     <script src="chat.js"></script>
 </head>
 
 <body style="margin: 0; padding: 0">
-<div style="display: flex; width: 100%; height: 80%;">
-    <div id="user-list" style="width: 20%; height: 100%; background: whitesmoke; bor">
-        <div class="actual">Loading...</div>
+<div class="row" style="width: 100%; height: 80vh;">
+    <div class="col-sm-3" style="height: 100%; background: whitesmoke;">
+        <div class="search-section">
+            <p>Buscar amigos</p>
+            <input type="text" id="user-search">
+        </div>
+        <div id="user-list">
+            <div class="actual">Loading...</div>
+        </div>
     </div>
 
-    <div style="width: 80%;height: 100%; display: flex; margin-left: 1em; margin-top: 1em">
-        <div id="text" class="scrollbar-inner" style="width: 100%">
-
-
-            <p style="font-style: italic;">Persone:</p>
-            <p>
-                Lorem ipsum dolor sit amet
-            </p>
-
-            <p style="font-style: italic;">Usuario 1:</p>
-            <p>
-                Lorem ipsum dolor sit ametamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh aamet, consectetur adipisicing elit. Proin nibh a, consectetur adipisicing elit. Proin nibh a
-            </p>
-
-            <p style="font-style: italic;">Usuario 1:</p>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh a
-            </p>
-
-            <p style="font-style: italic;">Usuario 1:</p>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh a
-            </p>
-
-            <p style="font-style: italic;">Usuario 1:</p>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh a
-            </p>
-
-            <p style="font-style: italic;">Usuario 1:</p>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh a
-            </p>
-
-            <p style="font-style: italic;">Usuario 1:</p>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh a
-            </p>
-
-            <p style="font-style: italic;">Usuario 1:</p>
-            <p>
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Proin nibh a
-            </p>
-
-
+    <div class="conversation col-sm-9">
+        <div id="text" class="scrollbar-inner" style="height: 90%">
+            <h3>Sin conversaciones</h3>
         </div>
     </div>
 </div>
 
 
 <div style="width: 100%; height: 20%">
-<textarea rows="2" style="width: 70%;margin-left: 20%; margin-top: 5%">
-
-</textarea>
-
+    <input id="input-text" style="height: 2em; width: 70%;margin-left: 20%; margin-top: 5%">
 </div>
-</body>
 
+</body>
 </html>

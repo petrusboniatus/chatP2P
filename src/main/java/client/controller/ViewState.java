@@ -13,7 +13,8 @@ import java.util.Map;
 public enum ViewState {
     LOADING("client/view/loading.html"),
     LOGIN("client/view/login.html"),
-    MENU("client/view/chat.html");
+    MENU("client/view/chat.html"),
+    PROFILE("client/view/profile.html");
 
     private static ViewHandler handler = new ViewHandlerImpl();
     private static Map<String, View> cache = new HashMap<>();

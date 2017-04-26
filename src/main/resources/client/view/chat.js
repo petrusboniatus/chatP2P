@@ -2,6 +2,7 @@
  * Created by cout970 on 4/7/17.
  */
 
+controller.log("start");
 var controller = {};
 
 jQuery(document).ready(function () {
@@ -16,7 +17,7 @@ function onClick(event) {
 function updateDisplay() {
     var node = document.getElementById("user-list");
     node.innerHTML = "";
-    if (document.getElementById("user-search").value == "") {
+    if (document.getElementById("user-search").value === "") {
         var lista = controller.getFriends();
 
         for (var i = 0; i < lista.size(); i++) {
@@ -48,7 +49,7 @@ function loadTab(oldValue, conversation) {
     var node = document.getElementById("text");
     node.innerHTML = "";
 
-    if (conversation == null) {
+    if (conversation === null) {
         document.getElementById("input-text").setAttribute("disabled", true);
         return;
     }
@@ -80,7 +81,7 @@ function main() {
     };
     document.getElementById("input-text").onkeydown = function (e) {
         var code = event.which || event.keyCode;
-        if (code == 13) {
+        if (code === 13) {
             var node = document.getElementById("input-text");
             var txt = node.value;
             node.value = "";

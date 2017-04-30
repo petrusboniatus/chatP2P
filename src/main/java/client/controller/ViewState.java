@@ -3,6 +3,7 @@ package client.controller;
 import com.awesome.business.template.api.View;
 import com.awesome.business.template.api.ViewHandler;
 import com.awesome.business.template.controller.ViewHandlerImpl;
+import javafx.application.Platform;
 
 import java.util.HashMap;
 import java.util.Map;

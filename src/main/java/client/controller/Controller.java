@@ -9,17 +9,14 @@ import client.ClientMsg;
 import client.Conversation;
 import client.ServerConnection;
 import com.awesome.business.template.api.Observable;
-import com.awesome.business.template.controller.FXApplication;
-import javafx.scene.web.WebEngine;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.html.HTMLInputElement;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
@@ -32,16 +29,19 @@ public class Controller {
     private Map<String, Conversation> allConversations = new HashMap<>();
 
     //Observables
-    public Observable<List<IServer.IProfile>> friendProfiles = new Observable<>(new ArrayList<>(0));
+    public Observable<List<IServer.IProfile>> friendProfilesInternal = new Observable<>(new ArrayList<>(0));
+    public Observable<List<IServer.IProfile>> friendshipPetitionsInternal = new Observable<>(null);
+
+    public Observable<List<Pair<String, Boolean>>> friendProfiles = new Observable<>(new ArrayList<>(0));
+    public Observable<List<Pair<String, Boolean>>> friendshipPetitions = new Observable<>(null);
+
     public Observable<Conversation> selectedTab = new Observable<>(null);
-    public Observable<List<IServer.IProfile>> friendshipPetitions = new Observable<>(null);
     public Observable<List<String>> searchResults = new Observable<>(new ArrayList<>());
 
 
     public Map<String, Conversation> getConversations() {
         return allConversations;
     }
-
 
     public void connectToServer() {
         ViewState.LOADING.load(this);
@@ -106,27 +106,33 @@ public class Controller {
 
     public void showProfile() {
         Utils.runAsync(() -> {
-            updatePetitions();
             ViewState.PROFILE.load(this);
         });
     }
 
     private void updatePetitions() {
-        friendshipPetitions.set(handler.getFriendshipRequests());
+        List<IServer.IProfile> req = handler.getFriendshipRequests();
+        List<Pair<String, Boolean>> pet = req
+                .stream()
+                .map((profile) -> new Pair<String, Boolean>(profile.getName(), profile.isConnected()))
+                .collect(Collectors.toList());
+
+        friendshipPetitionsInternal.set(req);
+        friendshipPetitions.set(pet);
     }
 
     public void acceptFriendshipRequest(int id) {
-        IServer.IProfile friend = friendshipPetitions.get().get(id);
+        IServer.IProfile friend = friendshipPetitionsInternal.get().get(id);
         handler.acceptFriendPetition(friend);
         updatePetitions();
-        System.out.println(friendshipPetitions.get());
+        System.out.println(friendshipPetitionsInternal.get());
     }
 
     public void cancelFriendshipRequest(int id) {
-        IServer.IProfile friend = friendshipPetitions.get().get(id);
+        IServer.IProfile friend = friendshipPetitionsInternal.get().get(id);
         handler.cancelFriendPetition(friend);
         updatePetitions();
-        System.out.println(friendshipPetitions.get());
+        System.out.println(friendshipPetitionsInternal.get());
     }
 
 
@@ -146,7 +152,7 @@ public class Controller {
     }
 
     public List<IServer.IProfile> getFriends() {
-        return friendProfiles.get();
+        return friendProfilesInternal.get();
     }
 
     public void searchUsers(String str) {
@@ -180,7 +186,14 @@ public class Controller {
 
 
     public void updateFriends() {
-        friendProfiles.set(handler.getFriends());
+        List<IServer.IProfile> req = handler.getFriends();
+        List<Pair<String, Boolean>> pet = req
+                .stream()
+                .map((profile) -> new Pair<String, Boolean>(profile.getName(), profile.isConnected()))
+                .collect(Collectors.toList());
+
+        friendProfilesInternal.set(req);
+        friendProfiles.set(pet);
     }
 
     public void openTab(String name) {

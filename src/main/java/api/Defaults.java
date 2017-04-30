@@ -14,7 +14,8 @@ public class Defaults {
     public static final int databasePort = 27017;
 
     private static String getIP() {
-        String username = System.getProperty("user.name");
-        return username.contains("cout") ? "192.168.1.37" : "localhost";
+//        String username = System.getProperty("user.name");
+//        return username.contains("cout") ? "192.168.1.37" : "localhost";
+        return "localhost";
     }
 }

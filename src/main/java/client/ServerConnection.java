@@ -31,6 +31,8 @@ public class ServerConnection {
             token = server.login(client, name, password);
             credentials = new Credentials(name, password);
             alive.start();
+        } catch (IllegalArgumentException e) {
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -68,10 +70,6 @@ public class ServerConnection {
         client.getManager().connectToServer();
     }
 
-    public IServer.IAuthToken getToken() {
-        return token;
-    }
-
     public IServer getServer() {
         if (server == null) {
             server = RMI.lookup(url);
@@ -104,6 +102,47 @@ public class ServerConnection {
             e.printStackTrace();
         }
         return Collections.emptyList();
+    }
+
+    public void acceptFriendPetition(IServer.IProfile name) {
+        try {
+            getServer().acceptFriendPetition(token, name);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cancelFriendPetition(IServer.IProfile friend) {
+        try {
+            getServer().sendUnFriendshiptRequest(token, friend.getName());
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void changePassword(String oldPass, String newPass) {
+        try {
+            getServer().changePassword(token, oldPass, newPass);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendFriendShipRequest(String user) {
+        try {
+            getServer().sendFriendshiptRequest(token, user);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<IServer.IProfile> getFriendshipRequests() {
+        try {
+            return getServer().getFriendShipRequest(token);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private class Credentials {

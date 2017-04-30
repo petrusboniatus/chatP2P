@@ -9,6 +9,11 @@ import client.ClientMsg;
 import client.Conversation;
 import client.ServerConnection;
 import com.awesome.business.template.api.Observable;
+import com.awesome.business.template.controller.FXApplication;
+import javafx.scene.web.WebEngine;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.html.HTMLInputElement;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -29,21 +34,52 @@ public class Controller {
     //Observables
     public Observable<List<IServer.IProfile>> friendProfiles = new Observable<>(new ArrayList<>(0));
     public Observable<Conversation> selectedTab = new Observable<>(null);
+    public Observable<List<IServer.IProfile>> friendshipPetitions = new Observable<>(null);
     public Observable<List<String>> searchResults = new Observable<>(new ArrayList<>());
+
+
+    public Map<String, Conversation> getConversations() {
+        return allConversations;
+    }
+
+
+    public void connectToServer() {
+        ViewState.LOADING.load(this);
+
+        Client client;
+
+        try {
+            client = new Client(this);
+        } catch (RemoteException e) {
+            showError("Error interno, no se pudo crear la clase Cliente");
+            e.printStackTrace();
+            return;
+        }
+
+        handler = new ServerConnection(client, Defaults.clientURL);
+
+        if (handler.getServer() == null) {
+            showError("Error al connectar con el servidor");
+            return;
+        }
+
+        ViewState.LOGIN.load(this);
+    }
 
     public void showError(String error) {
         ViewState.LOADING.getView().runOnJS("showError('" + error + "');");
     }
+
+    // Login
 
     public boolean tryLogin(String name, String password) {
         boolean success = handler.tryLogin(name, password);
 
         if (success) {
             clientName = name;
-            new Thread(() -> {
-                ViewState.MENU.load(this);
-                onMenuOpen();
-            }).start();
+            loadChat();
+            updateFriends();
+            updatePetitions();
             return true;
         } else {
             return false;
@@ -60,12 +96,66 @@ public class Controller {
         }
     }
 
+    public void loadChat() {
+        Utils.runAsync(() -> {
+            ViewState.CHAT.load(this);
+        });
+    }
+
+    // Profile
+
+    public void showProfile() {
+        Utils.runAsync(() -> {
+            updatePetitions();
+            ViewState.PROFILE.load(this);
+        });
+    }
+
+    private void updatePetitions() {
+        friendshipPetitions.set(handler.getFriendshipRequests());
+    }
+
+    public void acceptFriendshipRequest(int id) {
+        IServer.IProfile friend = friendshipPetitions.get().get(id);
+        handler.acceptFriendPetition(friend);
+        updatePetitions();
+        System.out.println(friendshipPetitions.get());
+    }
+
+    public void cancelFriendshipRequest(int id) {
+        IServer.IProfile friend = friendshipPetitions.get().get(id);
+        handler.cancelFriendPetition(friend);
+        updatePetitions();
+        System.out.println(friendshipPetitions.get());
+    }
+
+
+    public boolean changePassword(String oldPass, String newPass) {
+        try {
+            handler.changePassword(oldPass, newPass);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    // Chat
+
+    public void sendFriendShipRequest(String user) {
+        handler.sendFriendShipRequest(user);
+    }
+
     public List<IServer.IProfile> getFriends() {
         return friendProfiles.get();
     }
 
     public void searchUsers(String str) {
-        searchResults.set(handler.searchUsers(str));
+        List<String> results = handler.searchUsers(str);
+        results.remove(clientName);
+        for (IServer.IProfile friend : getFriends()) {
+            results.remove(friend.getName());
+        }
+        searchResults.set(results);
     }
 
     public void sendMsg(String txt) {
@@ -88,42 +178,6 @@ public class Controller {
         }
     }
 
-    private void onMenuOpen() {
-        try {
-            List<String> list = handler.getServer().searchUsers(handler.getToken(), "");
-            List<IServer.IProfile> friends = handler.getServer().getFriends(handler.getToken());
-            List<String> ignoredUsers = new ArrayList<>(friends.size());
-
-            for (IServer.IProfile friend : friends) {
-                ignoredUsers.add(friend.getName());
-            }
-
-            ignoredUsers.add(clientName);
-
-            for (String s : list) {
-                if (!ignoredUsers.contains(s)) {
-                    try {
-                        System.out.println("send request: " + s);
-                        handler.getServer().sendFriendshiptRequest(handler.getToken(), s);
-                    } catch (Exception e) {
-
-                    }
-                }
-            }
-            Thread.sleep(1000);
-
-            List<IServer.IProfile> req = handler.getServer().getFriendShipRequest(handler.getToken());
-
-            for (IServer.IProfile iProfile : req) {
-                handler.getServer().acceptFriendPetition(handler.getToken(), iProfile);
-            }
-            updateFriends();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void updateFriends() {
         friendProfiles.set(handler.getFriends());
@@ -149,45 +203,17 @@ public class Controller {
             Conversation c = new Conversation(client);
             allConversations.put(name, c);
         }
-        selectedTab.set(allConversations.get(name));
+        Conversation conv = allConversations.get(name);
+        conv.resetUnread();
+        selectedTab.set(conv);
+        updateFriends();
     }
 
-    public void log(Object any) {
-        System.out.println("js> " + any);
-    }
-
-    public void connectToServer() {
-        ViewState.LOADING.load(this);
-
-        Client client;
-
-        try {
-            client = new Client(this);
-        } catch (RemoteException e) {
-            showError("Error interno, no se pudo crear la clase Cliente");
-            e.printStackTrace();
-            return;
-        }
-
-        handler = new ServerConnection(client, Defaults.clientURL);
-
-        if (handler.getServer() == null) {
-            showError("Error al connectar con el servidor");
-            return;
-        }
-
-        ViewState.LOGIN.load(this);
-    }
 
     public void receiveMsg(ClientMsg msg) {
+
         if (!allConversations.containsKey(msg.getUser())) {
-            IServer.IProfile profile = null;
-            for (IServer.IProfile friend : getFriends()) {
-                if (friend.getName() == msg.getUser()) {
-                    profile = friend;
-                    break;
-                }
-            }
+            IServer.IProfile profile = getProfile(msg.getUser());
             if (profile == null) {
                 return;
             }
@@ -195,10 +221,30 @@ public class Controller {
             Conversation conv = new Conversation(other);
             allConversations.put(profile.getName(), conv);
         }
+
         Conversation conv = allConversations.get(msg.getUser());
         conv.getMsgs().add(msg);
+
         if (selectedTab.get() == conv) {
             selectedTab.set(conv);
+        } else {
+            conv.incrementUnread();
         }
+        updateFriends();
+    }
+
+    private IServer.IProfile getProfile(String name) {
+        for (IServer.IProfile friend : getFriends()) {
+            if (friend.getName().equals(name)) {
+                return friend;
+            }
+        }
+        return null;
+    }
+
+    // Debug
+
+    public void log(Object any) {
+        System.out.println("js> " + any);
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 public class Conversation {
 
     private IClient other;
+    private int unreadCount;
 
     private List<ClientMsg> msgs = new ArrayList<>();
 
@@ -22,7 +23,19 @@ public class Conversation {
         return other;
     }
 
+    public int getUnreadCount() {
+        return unreadCount;
+    }
+
     public List<ClientMsg> getMsgs() {
         return msgs;
+    }
+
+    public void incrementUnread() {
+        unreadCount++;
+    }
+
+    public void resetUnread(){
+        unreadCount = 0;
     }
 }

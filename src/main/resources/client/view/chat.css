@@ -269,3 +269,9 @@
 
     margin: auto;
 }
+
+.unread-msg {
+    background-color: red;
+    border-radius: 0.5%;
+    color: white;margin-left: auto;
+}

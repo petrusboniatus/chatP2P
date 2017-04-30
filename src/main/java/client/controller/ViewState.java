@@ -13,11 +13,12 @@ import java.util.Map;
 public enum ViewState {
     LOADING("client/view/loading.html"),
     LOGIN("client/view/login.html"),
-    MENU("client/view/chat.html"),
+    CHAT("client/view/chat.html"),
     PROFILE("client/view/profile.html");
 
     private static ViewHandler handler = new ViewHandlerImpl();
     private static Map<String, View> cache = new HashMap<>();
+    private static ViewState currentView;
 
     private String path;
 
@@ -25,10 +26,15 @@ public enum ViewState {
         this.path = path;
     }
 
+    public static ViewState getCurrentView() {
+        return currentView;
+    }
+
     public void load(Controller ctrl) {
         View view = getView();
         System.out.println("cargando vista: " + view.getHtmlUrl());
         view.addObjectOnJS("controller", ctrl);
+        currentView = this;
         handler.show(view);
     }
 

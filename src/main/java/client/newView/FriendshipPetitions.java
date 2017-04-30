@@ -55,7 +55,7 @@ public class FriendshipPetitions extends View {
     }
 
     @Override
-    public JPanel getRoot() {
+    public JPanel getRoot2() {
         return root;
     }
 }

@@ -1,6 +1,5 @@
 package client.newView;
 
-import api.IP2P;
 import api.IServer;
 import client.ClientMsg;
 import client.Conversation;
@@ -20,9 +19,11 @@ public class Chat extends View {
     private JTextField userInput;
     private JButton volverButton;
     private JTextArea textArea;
-    private JPanel root;
+    private JPanel root2;
     private JPanel sidePanel;
     private JLabel title;
+    private JButton enviarArchivoButton;
+    private JPanel root;
 
     private static final String template = "Hablando con %user%";
 
@@ -44,6 +45,14 @@ public class Chat extends View {
         });
         volverButton.addActionListener(e -> {
             ViewHandler.MENU.show();
+        });
+        enviarArchivoButton.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser();
+            int option = chooser.showOpenDialog(null);
+            if(option == JFileChooser.APPROVE_OPTION){
+                getController().sendFile(chooser.getSelectedFile());
+                onLoad();
+            }
         });
     }
 
@@ -96,7 +105,7 @@ public class Chat extends View {
     }
 
     @Override
-    public JPanel getRoot() {
+    public JPanel getRoot2() {
         return root;
     }
 }

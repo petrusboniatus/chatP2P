@@ -10,7 +10,7 @@ public class Loading extends View {
     private JLabel label;
 
     @Override
-    public JPanel getRoot() {
+    public JPanel getRoot2() {
         return root;
     }
 

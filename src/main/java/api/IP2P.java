@@ -1,5 +1,6 @@
 package api;
 
+import client.ClientFile;
 import client.ClientMsg;
 
 import java.io.Serializable;
@@ -14,4 +15,6 @@ public interface IP2P extends Serializable, Remote {
     String getUserName() throws RemoteException;
 
     void sendMsg(ClientMsg msg) throws RemoteException;
+
+    void sendFile(ClientFile msg) throws RemoteException;
 }

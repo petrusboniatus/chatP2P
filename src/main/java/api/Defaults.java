@@ -6,7 +6,7 @@ package api;
 public class Defaults {
 
     public static final String serverHost = "localhost";
-    public static final int serverPort = 1099;
+    public static final int serverPort = 8080;
     public static final String serverName = "Server";
     public static final String clientURL = "rmi://" + serverHost + ":" + serverPort + "/" + serverName;
 

@@ -4,11 +4,9 @@ import api.Defaults;
 import client.Client;
 import client.ServerConnection;
 import client.controller.Controller;
-import client.controller.ViewState;
 
 import javax.swing.*;
 import java.rmi.RemoteException;
-import java.util.Arrays;
 
 /**
  * Created by cout970 on 4/30/17.
@@ -23,7 +21,7 @@ public enum ViewHandler {
     FRIENDSHIP_REQUESTS(new FriendshipPetitions());
 
 
-    private static JFrame window = new JFrame();
+    private static JFrame window = new JFrame("Chat P2P");
     private static Controller controller = new Controller();
     private static ViewHandler currentView = null;
     private View view;
@@ -39,8 +37,7 @@ public enum ViewHandler {
 
         try {
             UIManager.setLookAndFeel(UIManager.getInstalledLookAndFeels()[1].getClassName());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -52,7 +49,7 @@ public enum ViewHandler {
 
     public void show(){
         currentView = this;
-        window.setContentPane(view.getRoot());
+        window.setContentPane(view.getRoot2());
         window.show();
         view.onLoad();
     }

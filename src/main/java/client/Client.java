@@ -25,6 +25,7 @@ public class Client extends UnicastRemoteObject implements IClient, Serializable
     @Override
     public void notifyFriendListUpdates() throws RemoteException {
         manager.updateFriends();
+        manager.crearUnusedChats();
     }
 
     @Override
@@ -48,6 +49,11 @@ public class Client extends UnicastRemoteObject implements IClient, Serializable
         @Override
         public void sendMsg(ClientMsg msg) {
             getManager().receiveMsg(msg);
+        }
+
+        @Override
+        public void sendFile(ClientFile msg) throws RemoteException {
+            getManager().receiveFile(msg);
         }
     }
 

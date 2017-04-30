@@ -1,22 +1,18 @@
 package client.controller;
 
-import api.Defaults;
 import api.IClient;
 import api.IP2P;
 import api.IServer;
-import client.Client;
 import client.ClientMsg;
 import client.Conversation;
 import client.ServerConnection;
-import com.awesome.business.template.api.Observable;
+import client.newView.ViewHandler;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BinaryOperator;
-import java.util.stream.Collectors;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
@@ -29,45 +25,30 @@ public class Controller {
     private Map<String, Conversation> allConversations = new HashMap<>();
 
     //Observables
-    public Observable<List<IServer.IProfile>> friendProfilesInternal = new Observable<>(new ArrayList<>(0));
-    public Observable<List<IServer.IProfile>> friendshipPetitionsInternal = new Observable<>(null);
+    private List<IServer.IProfile> friendProfiles = new ArrayList<>(0);
+    private List<IServer.IProfile> friendshipPetitions = null;
 
-    public Observable<List<Pair<String, Boolean>>> friendProfiles = new Observable<>(new ArrayList<>(0));
-    public Observable<List<Pair<String, Boolean>>> friendshipPetitions = new Observable<>(null);
+    private Conversation selectedTab = null;
 
-    public Observable<Conversation> selectedTab = new Observable<>(null);
-    public Observable<List<String>> searchResults = new Observable<>(new ArrayList<>());
 
+    public List<IServer.IProfile> getFriendProfiles() {
+        return friendProfiles;
+    }
+
+    public List<IServer.IProfile> getFriendshipPetitions() {
+        return friendshipPetitions;
+    }
+
+    public Conversation getSelectedTab() {
+        return selectedTab;
+    }
 
     public Map<String, Conversation> getConversations() {
         return allConversations;
     }
 
-    public void connectToServer() {
-        ViewState.LOADING.load(this);
-
-        Client client;
-
-        try {
-            client = new Client(this);
-        } catch (RemoteException e) {
-            showError("Error interno, no se pudo crear la clase Cliente");
-            e.printStackTrace();
-            return;
-        }
-
-        handler = new ServerConnection(client, Defaults.clientURL);
-
-        if (handler.getServer() == null) {
-            showError("Error al connectar con el servidor");
-            return;
-        }
-
-        ViewState.LOGIN.load(this);
-    }
-
-    public void showError(String error) {
-        ViewState.LOADING.getView().runOnJS("showError('" + error + "');");
+    public void setHandler(ServerConnection handler) {
+        this.handler = handler;
     }
 
     // Login
@@ -77,9 +58,6 @@ public class Controller {
 
         if (success) {
             clientName = name;
-            loadChat();
-            updateFriends();
-            updatePetitions();
             return true;
         } else {
             return false;
@@ -96,47 +74,14 @@ public class Controller {
         }
     }
 
-    public void loadChat() {
-        Utils.runAsync(() -> {
-            ViewState.CHAT.load(this);
-            updateFriends();
-            updatePetitions();
-        });
-    }
-
     // Profile
 
-    public void showProfile() {
-        Utils.runAsync(() -> {
-            ViewState.PROFILE.load(this);
-            updateFriends();
-            updatePetitions();
-        });
-    }
-
-    private void updatePetitions() {
-        List<IServer.IProfile> req = handler.getFriendshipRequests();
-        List<Pair<String, Boolean>> pet = req
-                .stream()
-                .map((profile) -> new Pair<String, Boolean>(profile.getName(), profile.isConnected()))
-                .collect(Collectors.toList());
-
-        friendshipPetitionsInternal.set(req);
-        friendshipPetitions.set(pet);
-    }
-
-    public void acceptFriendshipRequest(int id) {
-        IServer.IProfile friend = friendshipPetitionsInternal.get().get(id);
-        handler.acceptFriendPetition(friend);
-        updatePetitions();
-        System.out.println(friendshipPetitionsInternal.get());
-    }
-
-    public void cancelFriendshipRequest(int id) {
-        IServer.IProfile friend = friendshipPetitionsInternal.get().get(id);
-        handler.cancelFriendPetition(friend);
-        updatePetitions();
-        System.out.println(friendshipPetitionsInternal.get());
+    public void acceptFriendshipRequest(IServer.IProfile friend) {
+        try {
+            handler.acceptFriendPetition(friend);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -155,21 +100,17 @@ public class Controller {
         handler.sendFriendShipRequest(user);
     }
 
-    public List<IServer.IProfile> getFriends() {
-        return friendProfilesInternal.get();
-    }
-
-    public void searchUsers(String str) {
+    public List<String> searchUsers(String str) {
         List<String> results = handler.searchUsers(str);
         results.remove(clientName);
-        for (IServer.IProfile friend : getFriends()) {
+        for (IServer.IProfile friend : friendProfiles) {
             results.remove(friend.getName());
         }
-        searchResults.set(results);
+        return results;
     }
 
     public void sendMsg(String txt) {
-        IClient client = selectedTab.get().getOther();
+        IClient client = selectedTab.getOther();
         IP2P tunnel = null;
         try {
             tunnel = client.getP2P();
@@ -178,9 +119,8 @@ public class Controller {
             return;
         }
         ClientMsg msg = new ClientMsg(clientName, txt);
-        Conversation conv = selectedTab.get();
+        Conversation conv = selectedTab;
         conv.getMsgs().add(msg);
-        selectedTab.set(conv);
         try {
             tunnel.sendMsg(msg);
         } catch (RemoteException e) {
@@ -190,19 +130,20 @@ public class Controller {
 
 
     public void updateFriends() {
+        updatePetitions();
         List<IServer.IProfile> req = handler.getFriends();
-        List<Pair<String, Boolean>> pet = req
-                .stream()
-                .map((profile) -> new Pair<String, Boolean>(profile.getName(), profile.isConnected()))
-                .collect(Collectors.toList());
+        friendProfiles = req;
+        ViewHandler.getCurrentView().onUpdate();
+    }
 
-        friendProfilesInternal.set(req);
-        friendProfiles.set(pet);
+    private void updatePetitions() {
+        List<IServer.IProfile> req = handler.getFriendshipRequests();
+        friendshipPetitions = req;
     }
 
     public void openTab(String name) {
         IServer.IProfile friend = null;
-        for (IServer.IProfile profile : getFriends()) {
+        for (IServer.IProfile profile : friendProfiles) {
             if (profile.getName().equals(name)) {
                 friend = profile;
                 break;
@@ -222,7 +163,7 @@ public class Controller {
         }
         Conversation conv = allConversations.get(name);
         conv.resetUnread();
-        selectedTab.set(conv);
+        selectedTab = conv;
         updateFriends();
     }
 
@@ -242,8 +183,8 @@ public class Controller {
         Conversation conv = allConversations.get(msg.getUser());
         conv.getMsgs().add(msg);
 
-        if (selectedTab.get() == conv) {
-            selectedTab.set(conv);
+        if (selectedTab == conv) {
+            selectedTab = conv;
         } else {
             conv.incrementUnread();
         }
@@ -251,7 +192,7 @@ public class Controller {
     }
 
     private IServer.IProfile getProfile(String name) {
-        for (IServer.IProfile friend : getFriends()) {
+        for (IServer.IProfile friend : friendProfiles) {
             if (friend.getName().equals(name)) {
                 return friend;
             }
@@ -259,9 +200,7 @@ public class Controller {
         return null;
     }
 
-    // Debug
-
-    public void log(Object any) {
-        System.out.println("js> " + any);
+    public String getUserName() {
+        return clientName;
     }
 }

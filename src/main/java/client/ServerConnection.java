@@ -3,6 +3,7 @@ package client;
 import api.IClient;
 import api.IServer;
 import api.RMI;
+import client.newView.ViewHandler;
 
 import java.rmi.RemoteException;
 import java.util.Collections;
@@ -67,7 +68,7 @@ public class ServerConnection {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        client.getManager().connectToServer();
+        ViewHandler.connectToServer();
     }
 
     public IServer getServer() {

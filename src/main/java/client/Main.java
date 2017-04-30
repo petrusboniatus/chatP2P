@@ -1,6 +1,6 @@
 package client;
 
-import client.controller.Controller;
+import client.newView.ViewHandler;
 
 /**
  * Created by Carlos Couto Cerdeira on 4/3/17.
@@ -8,9 +8,6 @@ import client.controller.Controller;
 public class Main {
 
     public static void main(String[] args) {
-        Controller ctr = new Controller();
-
-        ctr.connectToServer();
+        ViewHandler.init();
     }
-
 }

@@ -8,11 +8,7 @@ import javafx.application.Platform;
 public class Utils {
 
     public static void runAsync(Runnable task) {
-        System.out.println(Platform.isFxApplicationThread());
-        Thread a = new Thread(() -> {
-            System.out.println(Platform.isFxApplicationThread());
-            task.run();
-        });
+        Thread a = new Thread(task);
         a.setDaemon(false);
         a.start();
     }

@@ -99,6 +99,8 @@ public class Controller {
     public void loadChat() {
         Utils.runAsync(() -> {
             ViewState.CHAT.load(this);
+            updateFriends();
+            updatePetitions();
         });
     }
 
@@ -107,6 +109,8 @@ public class Controller {
     public void showProfile() {
         Utils.runAsync(() -> {
             ViewState.PROFILE.load(this);
+            updateFriends();
+            updatePetitions();
         });
     }
 

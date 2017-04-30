@@ -23,7 +23,7 @@ function loadPetitions() {
             //class="petition"
             newNode.classList.add("petition")
 
-            var name = profiles.get(i).getName()
+            var name = profiles.get(i).getFirst()
 
             var p = document.createElement("p")
             p.textContent = "Peticion de amistad de " + name

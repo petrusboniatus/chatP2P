@@ -26,19 +26,19 @@ function updateDisplay() {
     node.innerHTML = "";
 
     if (document.getElementById("user-search").value === "") {
-        var lista = controller.getFriends();
+        var lista = controller.friendProfiles.get();
         var convMap = controller.getConversations();
 
         for (var i = 0; i < lista.size(); i++) {
             var newNode = document.createElement("div");
-            var connected = lista.get(i).isConnected();
+            var connected = lista.get(i).getSecond();
             if (connected) {
                 newNode.classList.add("conectado");
             } else {
                 newNode.classList.add("desconectado");
             }
 
-            var name = lista.get(i).getName();
+            var name = lista.get(i).getFirst();
             newNode.innerText = name
 
             if (convMap.get(name) !== null) {

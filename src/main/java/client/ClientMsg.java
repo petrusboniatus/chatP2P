@@ -1,18 +1,26 @@
 package client;
 
+import api.IServer;
+
 import java.io.Serializable;
 
 /**
  * Created by cout970 on 4/7/17.
  */
-public class ClientMsg implements Serializable {
+public final class ClientMsg implements Serializable {
 
     private String user;
+    private IServer.IAuthToken token;
     private String msg;
 
-    public ClientMsg(String user, String msg) {
+    public ClientMsg(String user, IServer.IAuthToken token, String msg) {
         this.user = user;
+        this.token = token;
         this.msg = msg;
+    }
+
+    public boolean check(IServer.IAuthToken token){
+        return this.token.equals(token);
     }
 
     public String getUser() {

@@ -2,6 +2,7 @@ package server.remote;
 
 import api.IClient;
 import api.IServer;
+import com.sun.corba.se.spi.activation.IIOP_CLEAR_TEXT;
 import server.daos.DAOLogin;
 import server.daos.DAOUsuarios;
 import server.daos.Profile;
@@ -134,9 +135,10 @@ public class Server extends UnicastRemoteObject implements IServer {
         return (List) daoUsuarios.getAmigos(perfilConectado);
     }
 
-    @Override
-    public IClient getConnection(IAuthToken me, String name) throws RemoteException {
 
+    @Override
+    public void requestConnection(IAuthToken me, String name) throws RemoteException {
+        String clientName = ((AuthToken) me).getNombreUsuario();
         List<IProfile> amigos = getFriends(me);
 
         IProfile amigo = null;
@@ -151,7 +153,13 @@ public class Server extends UnicastRemoteObject implements IServer {
         if(!clientesConectados.containsKey(name))
             throw new IllegalArgumentException("Tu amigo no esta conectado");
 
-        return clientesConectados.get(name).getClient();
+        AuthToken token = new AuthToken(name, random.getString());
+
+        IClient sender = clientesConectados.get(clientName).getClient();
+        IClient receiver = clientesConectados.get(name).getClient();
+
+        sender.startConnections(receiver.getP2P(), token);
+        receiver.startConnections(sender.getP2P(), token);
     }
 
     @Override

@@ -87,15 +87,6 @@ public class ServerConnection {
         }
     }
 
-    public IClient connect(IServer.IProfile friend) {
-        try {
-            return getServer().getConnection(token, friend.getName());
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public List<String> searchUsers(String str) {
         try {
             return getServer().searchUsers(token, str);
@@ -143,6 +134,14 @@ public class ServerConnection {
         } catch (RemoteException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public void requestConnection(String name) {
+        try {
+            getServer().requestConnection(token, name);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 

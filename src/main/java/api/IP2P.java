@@ -11,5 +11,7 @@ import java.rmi.RemoteException;
  */
 public interface IP2P extends Serializable, Remote {
 
+    String getUserName() throws RemoteException;
+
     void sendMsg(ClientMsg msg) throws RemoteException;
 }

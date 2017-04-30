@@ -2,6 +2,7 @@ package client;
 
 import api.IClient;
 import api.IP2P;
+import api.IServer;
 import client.controller.Controller;
 
 import java.io.Serializable;
@@ -18,7 +19,7 @@ public class Client extends UnicastRemoteObject implements IClient, Serializable
 
     public Client(Controller manager) throws RemoteException {
         this.manager = manager;
-        tunnel = new Tunnel(this);
+        tunnel = new Tunnel();
     }
 
     @Override
@@ -37,15 +38,21 @@ public class Client extends UnicastRemoteObject implements IClient, Serializable
 
     private class Tunnel extends UnicastRemoteObject implements IP2P {
 
-        private Client client;
+        public Tunnel() throws RemoteException {}
 
-        public Tunnel(Client client) throws RemoteException {
-            this.client = client;
+        @Override
+        public String getUserName() throws RemoteException {
+            return getManager().getUserName();
         }
 
         @Override
         public void sendMsg(ClientMsg msg) {
-            client.getManager().receiveMsg(msg);
+            getManager().receiveMsg(msg);
         }
+    }
+
+    @Override
+    public void startConnections(IP2P connection, IServer.IAuthToken token) throws RemoteException {
+        manager.startConnection(connection, token);
     }
 }

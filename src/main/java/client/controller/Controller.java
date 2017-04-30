@@ -8,6 +8,7 @@ import client.Conversation;
 import client.ServerConnection;
 import client.newView.ViewHandler;
 
+import javax.swing.*;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -110,19 +111,13 @@ public class Controller {
     }
 
     public void sendMsg(String txt) {
-        IClient client = selectedTab.getOther();
-        IP2P tunnel = null;
-        try {
-            tunnel = client.getP2P();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            return;
-        }
-        ClientMsg msg = new ClientMsg(clientName, txt);
         Conversation conv = selectedTab;
-        conv.getMsgs().add(msg);
+        IP2P client = conv.getOther();
+        ClientMsg msg = new ClientMsg(clientName, conv.getToken(), txt);
+
         try {
-            tunnel.sendMsg(msg);
+            client.sendMsg(msg);
+            conv.getMsgs().add(msg);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -154,41 +149,32 @@ public class Controller {
             return;
         }
         if (!allConversations.containsKey(name)) {
-            IClient client = handler.connect(friend);
-            if (client == null) {
-                return;
-            }
-            Conversation c = new Conversation(client);
-            allConversations.put(name, c);
+            handler.requestConnection(name);
         }
-        Conversation conv = allConversations.get(name);
-        conv.resetUnread();
-        selectedTab = conv;
-        updateFriends();
+        if (allConversations.containsKey(name)) {
+            Conversation conv = allConversations.get(name);
+            conv.resetUnread();
+            selectedTab = conv;
+            updateFriends();
+        }
     }
 
 
     public void receiveMsg(ClientMsg msg) {
 
-        if (!allConversations.containsKey(msg.getUser())) {
-            IServer.IProfile profile = getProfile(msg.getUser());
-            if (profile == null) {
-                return;
+        if (allConversations.containsKey(msg.getUser())) {
+            Conversation conv = allConversations.get(msg.getUser());
+
+            if(msg.check(conv.getToken())){
+                conv.getMsgs().add(msg);
+                if (selectedTab == conv) {
+                    selectedTab = conv;
+                } else {
+                    conv.incrementUnread();
+                }
+                updateFriends();
             }
-            IClient other = handler.connect(profile);
-            Conversation conv = new Conversation(other);
-            allConversations.put(profile.getName(), conv);
         }
-
-        Conversation conv = allConversations.get(msg.getUser());
-        conv.getMsgs().add(msg);
-
-        if (selectedTab == conv) {
-            selectedTab = conv;
-        } else {
-            conv.incrementUnread();
-        }
-        updateFriends();
     }
 
     private IServer.IProfile getProfile(String name) {
@@ -202,5 +188,23 @@ public class Controller {
 
     public String getUserName() {
         return clientName;
+    }
+
+    public void startConnection(IP2P connection, IServer.IAuthToken token) {
+        String name = null;
+        try {
+            name = connection.getUserName();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        if (!allConversations.containsKey(name)) {
+            IServer.IProfile profile = getProfile(name);
+            if (profile == null) {
+                return;
+            }
+            Conversation conv = new Conversation(connection, token);
+            allConversations.put(profile.getName(), conv);
+        }
     }
 }

@@ -50,6 +50,11 @@ public class ServerTest {
         public IP2P getP2P() throws RemoteException {
             return null;
         }
+
+        @Override
+        public void startConnections(IP2P connection, IServer.IAuthToken token) {
+
+        }
     }
 
     public ServerTest(){

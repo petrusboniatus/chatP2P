@@ -26,6 +26,11 @@ public class AuthToken implements IServer.IAuthToken{
         this.randValue = randValue;
     }
 
+    AuthToken(String nombreUsuario, String randValue) {
+        this.nombreUsuario = nombreUsuario;
+        this.randValue = randValue;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

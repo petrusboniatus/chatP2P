@@ -34,7 +34,7 @@ public class Menu extends View{
     }
 
     @Override
-    public JPanel getRoot2() {
+    public JPanel getRoot() {
         return root;
     }
 }

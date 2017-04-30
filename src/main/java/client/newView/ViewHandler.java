@@ -49,7 +49,7 @@ public enum ViewHandler {
 
     public void show(){
         currentView = this;
-        window.setContentPane(view.getRoot2());
+        window.setContentPane(view.getRoot());
         window.show();
         view.onLoad();
     }

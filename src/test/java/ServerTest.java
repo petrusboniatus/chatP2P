@@ -115,117 +115,117 @@ public class ServerTest {
         }
 
     }
-
-
-    @Test
-    public void userFriendShips(){
-
-        insertUsers();
-        try {
-
-            IClient c1 = new ClientTest("usuario1");
-            IClient c2 = new ClientTest("usuario2");
-
-            IServer.IAuthToken t1 = server.login(c1, "usuario1", "usr2");
-            IServer.IAuthToken t2 = server.login(c2, "usuario2", "usr");
-
-            List<String> usuarios  = server.searchUsers(t1,"usuario2");
-
-            Assert.assertEquals("usuario2", usuarios.get(0));
-
-            server.sendFriendshiptRequest(t1,usuarios.get(0));
-
-            List<IServer.IProfile> peticiones = server.getFriendShipRequest(t2);
-
-            Assert.assertEquals(peticiones.get(0).getName(), "usuario1");
-
-            server.acceptFriendPetition(t2, peticiones.get(0));
-
-            Assert.assertEquals(1, server.getFriends(t1).size());
-            Assert.assertEquals(1, server.getFriends(t2).size());
-            Assert.assertEquals(0, server.getFriendShipRequest(t1).size());
-            Assert.assertEquals(0, server.getFriendShipRequest(t2).size());
-
-
-            IClient c1Requested = server.getConnection(t2, "usuario1");
-
-            Assert.assertEquals(c1, c1Requested);
-
-            server.sendUnFriendshiptRequest(t1, "usuario2");
-
-            Assert.assertEquals(0, server.getFriends(t1).size());
-            Assert.assertEquals(0, server.getFriends(t2).size());
-            Assert.assertEquals(0, server.getFriendShipRequest(t1).size());
-            Assert.assertEquals(0, server.getFriendShipRequest(t2).size());
-
-            limpiador.finalizarHilo();
-            hiloLimpiador.join();
-            limpiador.desconectarClientes();
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-
-        close();
-        dropTables();
-    }
-
-
-    @Test
-    public void limipiador(){
-        insertUsers();
-
-        try {
-
-
-            IClient c1 = new ClientTest("usuario1");
-            IClient c2 = new ClientTest("usuario2");
-
-            IServer.IAuthToken t1 = server.login(c1, "usuario1", "usr2");
-            IServer.IAuthToken t2 = server.login(c2, "usuario2", "usr");
-
-            server.sendFriendshiptRequest(t1,"usuario2");
-
-
-            List<IServer.IProfile> peticiones = server.getFriendShipRequest(t2);
-            server.acceptFriendPetition(t2,peticiones.get(0));
-            ((ClientTest)c1).notificado = false;
-
-            System.out.println(server.getFriends(t1));
-            System.out.println(server.getFriends(t2));
-
-
-            Thread.sleep(4000);
-            server.imAlive(t1);
-            IClient c = server.getConnection(t1,"usuario2");
-
-            System.out.println(server.getFriends(t1));
-            System.out.println(server.getFriends(t2));
-
-
-            Thread.sleep(4000);
-
-            System.out.println(server.getFriends(t1));
-
-
-            try{
-                IClient c_1 = server.getConnection(t1,"usuario2");
-                fail("Debería dar una execpición");
-            }catch (IllegalArgumentException e){/*España va bién*/}
-
-            System.out.println(server.getFriends(t1));
-            Assert.assertTrue( ((ClientTest)c1).notificado);
-            List<IServer.IProfile> friends = server.getFriends(t1);
-            Assert.assertFalse(friends.get(0).isConnected());
-
-            close();
-
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        close();
-        dropTables();
-    }
+//
+//
+//    @Test
+//    public void userFriendShips(){
+//
+//        insertUsers();
+//        try {
+//
+//            IClient c1 = new ClientTest("usuario1");
+//            IClient c2 = new ClientTest("usuario2");
+//
+//            IServer.IAuthToken t1 = server.login(c1, "usuario1", "usr2");
+//            IServer.IAuthToken t2 = server.login(c2, "usuario2", "usr");
+//
+//            List<String> usuarios  = server.searchUsers(t1,"usuario2");
+//
+//            Assert.assertEquals("usuario2", usuarios.get(0));
+//
+//            server.sendFriendshiptRequest(t1,usuarios.get(0));
+//
+//            List<IServer.IProfile> peticiones = server.getFriendShipRequest(t2);
+//
+//            Assert.assertEquals(peticiones.get(0).getName(), "usuario1");
+//
+//            server.acceptFriendPetition(t2, peticiones.get(0));
+//
+//            Assert.assertEquals(1, server.getFriends(t1).size());
+//            Assert.assertEquals(1, server.getFriends(t2).size());
+//            Assert.assertEquals(0, server.getFriendShipRequest(t1).size());
+//            Assert.assertEquals(0, server.getFriendShipRequest(t2).size());
+//
+//
+//            IClient c1Requested = server.getConnection(t2, "usuario1");
+//
+//            Assert.assertEquals(c1, c1Requested);
+//
+//            server.sendUnFriendshiptRequest(t1, "usuario2");
+//
+//            Assert.assertEquals(0, server.getFriends(t1).size());
+//            Assert.assertEquals(0, server.getFriends(t2).size());
+//            Assert.assertEquals(0, server.getFriendShipRequest(t1).size());
+//            Assert.assertEquals(0, server.getFriendShipRequest(t2).size());
+//
+//            limpiador.finalizarHilo();
+//            hiloLimpiador.join();
+//            limpiador.desconectarClientes();
+//
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//
+//        close();
+//        dropTables();
+//    }
+//
+//
+//    @Test
+//    public void limipiador(){
+//        insertUsers();
+//
+//        try {
+//
+//
+//            IClient c1 = new ClientTest("usuario1");
+//            IClient c2 = new ClientTest("usuario2");
+//
+//            IServer.IAuthToken t1 = server.login(c1, "usuario1", "usr2");
+//            IServer.IAuthToken t2 = server.login(c2, "usuario2", "usr");
+//
+//            server.sendFriendshiptRequest(t1,"usuario2");
+//
+//
+//            List<IServer.IProfile> peticiones = server.getFriendShipRequest(t2);
+//            server.acceptFriendPetition(t2,peticiones.get(0));
+//            ((ClientTest)c1).notificado = false;
+//
+//            System.out.println(server.getFriends(t1));
+//            System.out.println(server.getFriends(t2));
+//
+//
+//            Thread.sleep(4000);
+//            server.imAlive(t1);
+//            IClient c = server.getConnection(t1,"usuario2");
+//
+//            System.out.println(server.getFriends(t1));
+//            System.out.println(server.getFriends(t2));
+//
+//
+//            Thread.sleep(4000);
+//
+//            System.out.println(server.getFriends(t1));
+//
+//
+//            try{
+//                IClient c_1 = server.getConnection(t1,"usuario2");
+//                fail("Debería dar una execpición");
+//            }catch (IllegalArgumentException e){/*España va bién*/}
+//
+//            System.out.println(server.getFriends(t1));
+//            Assert.assertTrue( ((ClientTest)c1).notificado);
+//            List<IServer.IProfile> friends = server.getFriends(t1);
+//            Assert.assertFalse(friends.get(0).isConnected());
+//
+//            close();
+//
+//        }catch (Exception e){
+//            e.printStackTrace();
+//        }
+//        close();
+//        dropTables();
+//    }
 
 
     @Test

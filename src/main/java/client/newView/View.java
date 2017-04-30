@@ -15,7 +15,7 @@ public abstract class View {
 
     public void onUpdate(){}
 
-    public abstract JPanel getRoot2();
+    public abstract JPanel getRoot();
 
     public void setController(Controller controller) {
         this.controller = controller;

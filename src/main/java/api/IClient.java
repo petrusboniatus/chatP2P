@@ -16,4 +16,6 @@ public interface IClient extends Remote, Serializable {
     void notifyFriendListUpdates() throws RemoteException;
 
     IP2P getP2P() throws RemoteException;
+
+    void startConnections(IP2P connection, IServer.IAuthToken token);
 }

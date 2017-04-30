@@ -61,7 +61,7 @@ public interface IServer extends Remote {
      * @param name nombre del otro cliente
      * @return objeto remoto de otro cliente
      */
-    IClient getConnection(IAuthToken me, String name) throws RemoteException;
+    void requestConnection(IAuthToken me, String name) throws RemoteException;
 
     /**
      * Enviar peticion de amistad
